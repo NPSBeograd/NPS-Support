@@ -1,4 +1,5 @@
-name: Suggestion feature
+name: Suggestion Feature
+
 description: Request a suggestion feature
 title: "[Suggestion]: "
 labels: ["suggestion"]
