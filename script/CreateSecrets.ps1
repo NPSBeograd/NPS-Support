@@ -11,24 +11,15 @@ Param(
 )
 
 Install-PackageProvider -Name NuGet -Force
+
 New-Item -Path "./LibSodiumNuget" -ItemType Directory
+
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
-# Path to the DLL inside the LibSodiumPackage folder
-$libsodiumPath = Join-Path (Get-Location) "LibSodiumPackage\\libsodium.dll"
+Write-Host "LIBSODIUM"
+ls "./LibSodiumPackage"
 
-# Load the DLL
-Add-Type -TypeDefinition @"
-   using System;
-   public class LibSodium {
-      [DllImport("$libsodiumPath", CallingConvention=CallingConvention.Cdecl)]
-      public static extern int sodium_init();
-      // Add other function declarations as needed
-   }
-"@ -Language CSharp
-
-# Initialize libsodium
-[LibSodium]::sodium_init()
+Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
@@ -61,10 +52,10 @@ $prod_auth= [System.Text.Encoding]::UTF8.GetBytes("PROD_AUTHCONTEXT")
 $secret_value_bytes = [System.Text.Encoding]::UTF8.GetBytes($secret_value_string)
 $decoded_public_key = [System.Convert]::FromBase64String($key)
 
-$sealedPublicKeyBox = [LibSodium.SealedPublicKeyBox]::Create($secret_value_bytes, $decoded_public_key)
+$sealedPublicKeyBox = [Sodium.SealedPublicKeyBox]::Create($secret_value_bytes, $decoded_public_key)
 $sealedPublicKeyBoxBase64 = [System.Convert]::ToBase64String($sealedPublicKeyBox)
 
-$url_secret=" https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVIRONMENTNAME"
+$url_secret=" https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVORONMENTNAME"
 $body=@{"encrypted_value"= $sealedPublicKeyBoxBase64
         "key_id"         = $key_id
         }
