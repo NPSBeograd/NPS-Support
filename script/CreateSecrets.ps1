@@ -33,6 +33,37 @@ Add-Type @"
     }
 "@
 
+# Define the DLL import and function signatures
+Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+
+    public static class Sodium {
+        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_box_seal(byte[] ciphertext, byte[] message, ulong messageLength, byte[] publicKey);
+
+        public static byte[] SealedPublicKeyBoxCreate(byte[] message, byte[] publicKey) {
+            if (message == null) {
+                throw new ArgumentNullException(nameof(message));
+            }
+            if (publicKey == null) {
+                throw new ArgumentNullException(nameof(publicKey));
+            }
+
+            byte[] ciphertext = new byte[message.Length + crypto_box_sealbytes()];
+            int result = crypto_box_seal(ciphertext, message, (ulong)message.Length, publicKey);
+            if (result != 0) {
+                throw new InvalidOperationException("SealedPublicKeyBox creation failed.");
+            }
+            return ciphertext;
+        }
+
+        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int crypto_box_sealbytes();
+}
+"@
+
+
 # Call the unmanaged function
 [LibSodium]::sodium_init()
 Add-Type -AssemblyName System.Threading.Tasks
@@ -67,7 +98,7 @@ $prod_auth= [System.Text.Encoding]::UTF8.GetBytes("PROD_AUTHCONTEXT")
 $secret_value_bytes = [System.Text.Encoding]::UTF8.GetBytes($secret_value_string)
 $decoded_public_key = [System.Convert]::FromBase64String($key)
 
-$sealedPublicKeyBox = [Sodium.SealedPublicKeyBox]::Create($secret_value_bytes, $decoded_public_key)
+$sealedPublicKeyBox = [Sodium]::SealedPublicKeyBoxCreate($secret_value_bytes, $decoded_public_key)
 $sealedPublicKeyBoxBase64 = [System.Convert]::ToBase64String($sealedPublicKeyBox)
 
 $url_secret=" https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVORONMENTNAME"
