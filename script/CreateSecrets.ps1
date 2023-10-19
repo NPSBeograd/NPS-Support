@@ -20,7 +20,6 @@ New-Item -Path "./LibSodiumNuget" -ItemType Directory
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
 Write-Host "Importing libSodium Library"
-# Define the DLL import and function signatures
 Add-Type @"
     using System;
     using System.Runtime.InteropServices;
@@ -31,8 +30,6 @@ Add-Type @"
     }
 "@
 
-# Define the DLL import and function signatures
-# Define the DLL import and function signatures
 Add-Type @"
     using System;
     using System.Runtime.InteropServices;
@@ -63,7 +60,6 @@ Add-Type @"
 "@
 
 
-# Call the unmanaged function
 [LibSodium]::sodium_init()
 
 Write-Host "LibSodium is imported"
