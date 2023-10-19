@@ -64,7 +64,7 @@ jobs:
         - name: Create secrets
           shell: pwsh
           run: |
-            if((${{github.event.inputs.Environmet_deployment}} -like "PROD*") -or (${{github.event.inputs.Environmet_deployment}} -like "FAT*")){
+           if((${{ github.event.inputs.Environmet_deployment }} =~ '^PROD.*') -or (${{ github.event.inputs.Environmet_deployment }} =~ '^FAT.*')){
               ./script/CreateSecrets.ps1 -Token "${{ SECRETS.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}" -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy}}"
             }
             else {
