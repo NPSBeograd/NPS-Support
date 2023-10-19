@@ -10,6 +10,9 @@ Param(
     [string] $Environmet_deployment
 )
 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+
 Install-PackageProvider -Name NuGet -Force
 
 New-Item -Path "./LibSodiumNuget" -ItemType Directory
