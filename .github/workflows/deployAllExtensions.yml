@@ -67,6 +67,7 @@ jobs:
            ./script/CreateSecrets.ps1 -Token "${{ SECRETS.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}" -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy}}"
 
  Initialization:
+          needs: [Create_secrets]
           runs-on: [ windows-latest ]
           outputs:
             telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -162,7 +163,7 @@ jobs:
                   }
 
  Deploy:
-   
+    needs: [Initialization]
     runs-on:  [ windows-latest ]
     name: Deploy to ${{ github.event.inputs.Environmet_name }}
     environment:

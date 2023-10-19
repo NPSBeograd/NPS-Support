@@ -13,7 +13,6 @@ Param(
     [Parameter(HelpMessage = "The settings for all Deployment Environments", Mandatory = $true)]
     [string] $Environmet_name,
     [Parameter(HelpMessage = "fat or prod", Mandatory = $true)]
-    [ValidateSet('PROD*','FAT*')]
     [string] $Environmet_deployment
 )
 
