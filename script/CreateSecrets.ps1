@@ -34,6 +34,7 @@ Add-Type @"
 "@
 
 # Define the DLL import and function signatures
+# Define the DLL import and function signatures
 Add-Type @"
     using System;
     using System.Runtime.InteropServices;
@@ -44,10 +45,10 @@ Add-Type @"
 
         public static byte[] SealedPublicKeyBoxCreate(byte[] message, byte[] publicKey) {
             if (message == null) {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException("message");
             }
             if (publicKey == null) {
-                throw new ArgumentNullException(nameof(publicKey));
+                throw new ArgumentNullException("publicKey");
             }
 
             byte[] ciphertext = new byte[message.Length + crypto_box_sealbytes()];
