@@ -17,7 +17,7 @@ New-Item -Path "./LibSodiumNuget" -ItemType Directory
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
 Write-Host "LIBSODIUM"
-Get-ChildItem "./LibSodiumNuget"
+Get-ChildItem "./LibSodiumPackage"
 
 Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
