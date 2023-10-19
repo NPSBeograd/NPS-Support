@@ -16,6 +16,7 @@ New-Item -Path "./LibSodiumNuget" -ItemType Directory
 
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
+Write-Host "Content"
 ls "./LibSodiumPackage"
 
 Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
