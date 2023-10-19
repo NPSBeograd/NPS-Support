@@ -13,7 +13,6 @@ Param(
 Install-PackageProvider -Name NuGet -Force
 
 New-Item -Path "./LibSodiumNuget" -ItemType Directory
-Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/libsodium/1.0.19" -OutFile "./LibSodiumNuget/libsodium.nupkg"
 
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
