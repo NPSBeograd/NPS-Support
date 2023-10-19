@@ -11,13 +11,9 @@ Param(
 )
 
 Install-PackageProvider -Name NuGet -Force
-
 New-Item -Path "./LibSodiumNuget" -ItemType Directory
-
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
-
-Write-Host "Content"
-ls "./LibSodiumPackage"
+Import-Module libsodium
 
 Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
