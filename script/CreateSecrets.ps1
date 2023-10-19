@@ -115,6 +115,6 @@ $body=@{"encrypted_value"= $sealedPublicKeyBoxBase64
 
 Write-Host "Creating Secret"
 
-Invoke-RestMethod -Method Put -Uri $url_secret -Body $body -Headers $header
+Invoke-RestMethod -Method Put -Uri $url_secret -Body $body| ConvertTo-Json -Headers $header
 
 Write-Host "Secret is created"
