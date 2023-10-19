@@ -15,7 +15,7 @@ New-Item -Path "./LibSodiumNuget" -ItemType Directory
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
 # Path to the DLL inside the LibSodiumPackage folder
-$libsodiumPath = Join-Path (Get-Location) "LibSodiumPackage/libsodium.dll"
+$libsodiumPath = Join-Path (Get-Location) "LibSodiumPackage\\libsodium.dll"
 
 # Load the DLL
 Add-Type -TypeDefinition @"
