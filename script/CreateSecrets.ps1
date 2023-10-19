@@ -19,7 +19,7 @@ nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 Write-Host "LIBSODIUM"
 Get-ChildItem "./LibSodiumPackage/libsodium/runtimes"
 
-Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
+Add-Type -Path "./LibSodiumPackage/libsodium/runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
