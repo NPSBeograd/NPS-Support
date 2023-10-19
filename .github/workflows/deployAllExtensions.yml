@@ -43,7 +43,6 @@ on:
 
             Translation:
                 type: boolean
-                default: false
             
 jobs:
 
