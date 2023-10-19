@@ -22,7 +22,19 @@ nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 Write-Host "LIBSODIUM"
 Get-ChildItem "./LibSodiumPackage/libsodium/runtimes/win-x64/native"
 
-Add-Type -Path "./LibSodiumPackage/libsodium/runtimes/win-x64/native/libsodium.dll"
+# Define the DLL import and function signatures
+Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+
+    public class LibSodium {
+        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int sodium_init();
+    }
+"@
+
+# Call the unmanaged function
+[LibSodium]::sodium_init()
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
