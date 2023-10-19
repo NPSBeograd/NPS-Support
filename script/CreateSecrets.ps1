@@ -1,18 +1,14 @@
 Param(
     [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $true)]
-    [string] $token,
-    [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
-    [string] $parentTelemetryScopeJson = '7b7d',
+    [string] $Token,
     [Parameter(HelpMessage = "Name of environment to deploy to", Mandatory = $true)]
     [string] $environmentName,
-    [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
-    [string] $artifacts,
-    [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $false)]
+    [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $true)]
     [ValidateSet('CD','Publish')]
     [string] $Publishing_Stategy = "CD",
     [Parameter(HelpMessage = "The settings for all Deployment Environments", Mandatory = $true)]
     [string] $Environmet_name,
-    [Parameter(HelpMessage = "fat or prod", Mandatory = $true)]
+    [Parameter(HelpMessage = "fat or prod", Mandatory = $false)]
     [string] $Environmet_deployment
 )
 
