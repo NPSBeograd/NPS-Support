@@ -19,9 +19,7 @@ New-Item -Path "./LibSodiumNuget" -ItemType Directory
 
 nuget install libsodium -OutputDirectory "./LibSodiumPackage" -ExcludeVersion
 
-Write-Host "LIBSODIUM"
-Get-ChildItem "./LibSodiumPackage/libsodium/runtimes/win-x64/native"
-
+Write-Host "Importing libSodium Library"
 # Define the DLL import and function signatures
 Add-Type @"
     using System;
@@ -67,6 +65,8 @@ Add-Type @"
 
 # Call the unmanaged function
 [LibSodium]::sodium_init()
+
+Write-Host "LibSodium is imported"
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
@@ -77,6 +77,8 @@ $header.Add("Accept", "application/vnd.github+json")
 $header.Add("X-Github-Api-Version", "2022-11-28")
 
 $response_public_key=Invoke-RestMethod -Method Get -Uri $url_public_key -Headers $header
+
+Write-Host "Getting public key from repository"
 $key=$response_public_key.key
 $key_id=$response_public_key.key_id
 
@@ -93,18 +95,26 @@ if ($Publishing_Stategy -eq "CD"){
 }
 
 
-$prod_auth= [System.Text.Encoding]::UTF8.GetBytes("PROD_AUTHCONTEXT")
+#$prod_auth= [System.Text.Encoding]::UTF8.GetBytes("PROD_AUTHCONTEXT")
 
 
 $secret_value_bytes = [System.Text.Encoding]::UTF8.GetBytes($secret_value_string)
 $decoded_public_key = [System.Convert]::FromBase64String($key)
+Write-Host "Encoding public key"
+
 
 $sealedPublicKeyBox = [Sodium]::SealedPublicKeyBoxCreate($secret_value_bytes, $decoded_public_key)
 $sealedPublicKeyBoxBase64 = [System.Convert]::ToBase64String($sealedPublicKeyBox)
+
+Write-Host "Sealding Secret Box"
 
 $url_secret=" https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVORONMENTNAME"
 $body=@{"encrypted_value"= $sealedPublicKeyBoxBase64
         "key_id"         = $key_id
         }
 
+Write-Host "Creating Secret"
+
 Invoke-RestMethod -Method Put -Uri $url_secret -Body $body -Headers $header
+
+Write-Host "Secret is created"
