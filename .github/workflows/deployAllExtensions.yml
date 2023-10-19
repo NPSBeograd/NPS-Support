@@ -47,7 +47,7 @@ on:
 jobs:
 
  Create_secrets:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
         - name: Checkout
@@ -55,14 +55,8 @@ jobs:
           with:
             lfs: true
         
-        - name: Set permissions for the PowerShell script
-          shell: pwsh
-          run: |
-             # Resolve the path to the PowerShell script
-             $scriptPath = "${{ github.workspace }}/script/CreateSecrets.ps1"
-             chmod +x $scriptPath
         - name: Create secrets
-          shell: pwsh
+          shell: powershell
           run: |
            $deployment = "${{ github.event.inputs.Environmet_deployment }}"
            if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {

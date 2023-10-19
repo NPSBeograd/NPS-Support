@@ -10,18 +10,11 @@ Param(
     [string] $Environmet_deployment
 )
 
-sudo apt-get install mono-complete
-sudo apt-get install nuget
+New-Item -Path "./LibSodiumNuget" -ItemType Directory
+Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/libsodium/1.0.19" -OutFile "./LibSodiumNuget/libsodium.nupkg"
 
-nuget install libsodium
-
-dotnet nuget locals global-packages --list
-
-$version= ls /home/runner/.nuget/packages/libsodium
-
-
-Expand-Archive -Path "/home/runner/.nuget/packages/libsodium/$version/libsodium.$($version).nupkg" -DestinationPath "LibSodiumPackage"
-Add-Type -Path "./LibSodiumPackage/runtimes/linux-x64/native/libsodium.so"
+Expand-Archive -Path "./LibSodiumNuget/libsodium.nupkg" -DestinationPath "LibSodiumPackage"
+Add-Type -Path "./LibSodiumPackage/runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
