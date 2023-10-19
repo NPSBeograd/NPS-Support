@@ -106,7 +106,7 @@ $sealedPublicKeyBoxBase64 = [System.Convert]::ToBase64String($sealedPublicKeyBox
 
 Write-Host "Sealding Secret Box"
 
-$url_secret = " https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVORONMENTNAME"
+$url_secret = " https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/$($Environmet_name)_ENVIRONMENTNAME"
 $body = @{"encrypted_value" = $sealedPublicKeyBoxBase64
     "key_id"                = "$key_id"
 } | ConvertTo-Json
