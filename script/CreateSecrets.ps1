@@ -1,12 +1,10 @@
 Param(
     [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $true)]
     [string] $Token,
-    [Parameter(HelpMessage = "Name of environment to deploy to", Mandatory = $true)]
-    [string] $environmentName,
     [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $true)]
     [ValidateSet('CD','Publish')]
     [string] $Publishing_Stategy = "CD",
-    [Parameter(HelpMessage = "The settings for all Deployment Environments", Mandatory = $true)]
+    [Parameter(HelpMessage = "Name of environment to deploy to", Mandatory = $true)]
     [string] $Environmet_name,
     [Parameter(HelpMessage = "fat or prod", Mandatory = $false)]
     [string] $Environmet_deployment

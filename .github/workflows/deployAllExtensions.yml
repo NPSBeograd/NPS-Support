@@ -66,7 +66,7 @@ jobs:
           run: |
            $deployment = "${{ github.event.inputs.Environmet_deployment }}"
            if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {
-            ./script/CreateSecrets.ps1 -Token "${{ secrets.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "$deployment" -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
+            ./script/CreateSecrets.ps1 -Token "${{ secrets.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment $deployment -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
            } else {
             ./script/CreateSecrets.ps1 -Token "${{ secrets.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
            }
