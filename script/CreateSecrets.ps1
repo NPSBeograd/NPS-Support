@@ -22,9 +22,8 @@ $version= ls /home/runner/.nuget/packages/libsodium
 
 Expand-Archive -Path "/home/runner/.nuget/packages/libsodium/$version/libsodium.$($version).nupkg" -DestinationPath "LibSodiumPackage"
 
-ls /home/runner/work/NPS-Support/NPS-Support/LibSodiumPackage
-ls /home/runner/work/NPS-Support/NPS-Support/LibSodiumPackage/runtimes
-Add-Type -Path "./LibSodiumPackage/lib/netstandard2.0/Sodium.Core.dll"
+
+Add-Type -Path "./LibSodiumPackage//runtimes/win-x64/native/libsodium.dll"
 Add-Type -AssemblyName System.Threading.Tasks
 Add-Type -AssemblyName System.Security
 
