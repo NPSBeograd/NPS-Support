@@ -1,11 +1,11 @@
 Param (
-    [bool] $BusinessCentralLocalization,
-    [bool] $TravelOrder,
-    [bool] $Manufacturing,
-    [bool] $EIN,
-    [bool] $HrmPayroll,
-    [bool] $EinLoc,
-    [bool] $Translation,
+    [string] $BusinessCentralLocalization,
+    [string] $TravelOrder,
+    [string] $Manufacturing,
+    [string] $EIN,
+    [string] $HrmPayroll,
+    [string] $EinLoc,
+    [string] $Translation,
     [string] $token
 )
 
@@ -43,7 +43,7 @@ function Get-Assets {
 
 foreach ($repositorieMap in $repositoriesMap.Keys){
 
-    if($repositoriesMap[$repositorieMap]){
+    if([bool]$repositoriesMap[$repositorieMap]){
         Get-Assets -RepositoryName $repositorieMap
     }
 }

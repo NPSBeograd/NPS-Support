@@ -141,42 +141,8 @@ jobs:
       - name: Download artifacts
         shell: powershell
         run: |
-          $BusinessCentralLocalization=false
-          $TravelOrder=false
-          $Manufacturing=false
-          $EIN=false
-          $HrmPayroll=false
-          $EinLoc=false
-          $Translation=false
 
-          if ("${{github.event.inputs.BusinessCentralLocalization}}" -eq "true"){
-            $BusinessCentralLocalization=true
-          }
-          if ("${{github.event.inputs.TravelOrder}}" -eq "true"){
-            $TravelOrder=true
-          }
-          if ("${{github.event.inputs.Manufacturing}}" -eq "true"){
-            $TravelOrder=true
-          }
-        
-          if ("${{github.event.inputs.EIN}}" -eq "true"){
-          $EIN=true
-          }
-
-          if ("${{github.event.inputs.HrmPayroll}}" -eq "true"){
-          $HrmPayroll=true
-          }
-
-          
-          if ("${{github.event.inputs.EinLoc}}" -eq "true"){
-          $EinLoc=true
-          }
-
-          if ("${{github.event.inputs.Translation}}" -eq "true"){
-          $Translation=true
-          }
-
-          ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization $BusinessCentralLocalization -TravelOrder $TravelOrder -Manufacturing $Manufacturing -EIN $EIN -HrmPayroll $HrmPayroll -EinLoc $EinLoc -Translation $Translation -token ${{ SECRETS.GHTOKENWORKFLOW}}
+          ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
 
       - name: Resolve Environment
         id: ResolveEnvironment
