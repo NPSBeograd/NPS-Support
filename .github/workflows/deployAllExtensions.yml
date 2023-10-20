@@ -87,21 +87,26 @@ jobs:
                 shell: powershell
                 eventId: "DO0091"
 
+            - name: Determine Delivery Target Secrets
+              id: DetermineDeliveryTargetSecrets
+              run: |
+                  $ErrorActionPreference = "STOP"
+                  Set-StrictMode -version 2.0
+                  $deliveryTargetSecrets = @('GitHubPackagesContext','NuGetContext','StorageContext','AppSourceContext')
+                  $namePrefix = 'DeliverTo'
+                  Get-Item -Path (Join-Path $ENV:GITHUB_WORKSPACE ".github/$($namePrefix)*.ps1") | ForEach-Object {
+                    $deliveryTarget = [System.IO.Path]::GetFileNameWithoutExtension($_.Name.SubString($namePrefix.Length))
+                    $deliveryTargetSecrets += @("$($deliveryTarget)Context")
+                  }
+                  Add-Content -Path $env:GITHUB_OUTPUT -Value "Secrets=$($deliveryTargetSecrets -join ',')"
+                  
             - name: Read settings
               id: ReadSettings
               uses: microsoft/AL-Go-Actions/ReadSettings@v3.1
               with:
                 shell: powershell
                 parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
-                getEnvironments: '*'
-            
-            - name: Determine Delivery Target Secrets
-              id: DetermineDeliveryTargetSecrets
-              uses: microsoft/AL-Go-Actions/DetermineDeliveryTargets@v3.3
-              with:
-                shell: powershell
-                checkContextSecrets: 'Y'
-                
+                getEnvironments: '*'                
       
             - name: Read secrets
               id: ReadSecrets
