@@ -37,8 +37,9 @@ function Get-Assets {
     # Get the download URL of the first asset
     $assetUrl = $firstAsset.browser_download_url
 
+    Write-Host "Asset url: " $assetUrl
     # Download the first asset
-    Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header
+    Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 }
 
 foreach ($repositorieMap in $repositoriesMap.Keys){
