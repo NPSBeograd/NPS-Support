@@ -39,7 +39,7 @@ function Get-Assets {
 
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
-    Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
+    Invoke-RestMethod -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 }
 
 foreach ($repositorieMap in $repositoriesMap.Keys){
