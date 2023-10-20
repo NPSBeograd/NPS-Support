@@ -149,30 +149,30 @@ jobs:
           $EinLoc=false
           $Translation=false
 
-          if (${{github.event.inputs.BusinessCentralLocalization}} = true){
+          if ("${{github.event.inputs.BusinessCentralLocalization}}" = "true"){
             $BusinessCentralLocalization=true
           }
-          if (${{github.event.inputs.TravelOrder}} = true){
+          if ("${{github.event.inputs.TravelOrder}}" = "true"){
             $TravelOrder=true
           }
-          if (${{github.event.inputs.Manufacturing}} = true){
+          if ("${{github.event.inputs.Manufacturing}}" = "true"){
             $TravelOrder=true
           }
         
-          if (${{github.event.inputs.EIN}} = true){
+          if ("${{github.event.inputs.EIN}}" = "true"){
           $EIN=true
           }
 
-          if (${{github.event.inputs.HrmPayroll}} = true){
+          if ("${{github.event.inputs.HrmPayroll}}" = "true"){
           $HrmPayroll=true
           }
 
           
-          if (${{github.event.inputs.EinLoc}} = true){
+          if ("${{github.event.inputs.EinLoc}}" = "true"){
           $EinLoc=true
           }
 
-          if (${{github.event.inputs.Translation}} = true){
+          if ("${{github.event.inputs.Translation}}" = "true"){
           $Translation=true
           }
 
