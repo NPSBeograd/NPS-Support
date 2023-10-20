@@ -48,7 +48,7 @@ function Get-Assets {
 for ([int] $i=0; i< $repositoriesMap.Keys.Count; i++) {
 
     if([bool]$repositoriesMap[$repositoriesMap.Keys[$i]]){
-        Get-Assets -RepositoryName $repositorieMap
+        Get-Assets -RepositoryName $repositoriesMap.Keys[$i]
     }
 }
 
