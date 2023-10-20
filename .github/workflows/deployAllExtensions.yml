@@ -127,14 +127,6 @@ jobs:
                 shell: powershell
                 getEnvironments: '*'
                 type: '${{ github.event.inputs.Publishing_Stategy}}'
-
-            - name: Resolve Environment
-              id: ResolveEnvironment
-              shell: powershell
-              run: |
-                 $EnvOutput = ./script/ResolveEnvironment.ps1 -Publishing_Stategy ${{ github.event.inputs.Publishing_Stategy}} -Environmet_deployment ${{ github.event.inputs.Environmet_deployment}}
-                 echo "::set-env name=ENV_OUTPUT::$EnvOutput"
-
            
  Deploy:
     needs: [Initialization]
