@@ -48,6 +48,7 @@ function Get-Assets {
 for ([int] $i=0; $i -le $repositoriesMap.Keys.Count; i++) {
 
     if([bool]$repositoriesMap[$repositoriesMap.Keys[$i]]){
+        Write-Host $repositoriesMap.Keys[$i]
         Get-Assets -RepositoryName $repositoriesMap.Keys[$i]
     }
 }
