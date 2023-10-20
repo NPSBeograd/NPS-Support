@@ -92,7 +92,7 @@ jobs:
               uses: microsoft/AL-Go-Actions/DetermineDeliveryTargets@v3.3
               with:
                 shell: powershell
-                checkContextSecrets: 'N'
+                checkContextSecrets: 'Y'
       
             - name: Read secrets
               id: ReadSecrets
