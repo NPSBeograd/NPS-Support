@@ -38,6 +38,7 @@ function Get-Assets {
     # Get the download URL of the first asset
     $assetUrl = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/assets/$($firstAsset.id)"
 
+    Write-Host "Browser url: $firstAsset.browser_download_url"
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
     $header["Accept"]= "application/octet-stream"
