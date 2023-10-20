@@ -36,7 +36,7 @@ function Get-Assets {
     $firstAsset = $latestRelease.assets[0]
 
     # Get the download URL of the first asset
-    $assetUrl = $firstAsset.browser_download_url
+    $assetUrl = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/assets/$($firstAsset.id)"
 
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
