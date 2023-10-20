@@ -45,7 +45,7 @@ function Get-Assets {
     Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 }
 
-for ([int] $i = 0; $i -le $repositoriesMap.Count; i++) {
+for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
 
     if ([bool]$repositoriesMap[$i].values[0]) {
         Write-Host $repositoriesMap[$i].Keys[0]
