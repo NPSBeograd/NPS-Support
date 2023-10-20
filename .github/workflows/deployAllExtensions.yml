@@ -86,6 +86,14 @@ jobs:
               with:
                 shell: powershell
                 eventId: "DO0091"
+
+            - name: Read settings
+              id: ReadSettings
+              uses: microsoft/AL-Go-Actions/ReadSettings@v3.1
+              with:
+                shell: powershell
+                parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
+                getEnvironments: '*'
             
             - name: Determine Delivery Target Secrets
               id: DetermineDeliveryTargetSecrets
@@ -93,6 +101,7 @@ jobs:
               with:
                 shell: powershell
                 checkContextSecrets: 'Y'
+                
       
             - name: Read secrets
               id: ReadSecrets
