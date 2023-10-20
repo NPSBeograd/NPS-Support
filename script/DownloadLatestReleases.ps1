@@ -21,6 +21,7 @@ $header=New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $header.Add("Authorization", "Bearer $token")
 $header.Add("Accept", "application/vnd.github+json")
 $header.Add("X-Github-Api-Version", "2022-11-28")
+$header.Add("Content-Type", "application/octet-stream")
 function Get-Assets {
     Param (
         [string] $RepositoryName
