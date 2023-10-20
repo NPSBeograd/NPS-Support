@@ -142,7 +142,7 @@ jobs:
         shell: powershell
         run: |
 
-          ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
+          ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
 
       - name: Resolve Environment
         id: ResolveEnvironment
