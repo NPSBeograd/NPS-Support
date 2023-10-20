@@ -126,7 +126,7 @@ jobs:
               with:
                 shell: powershell
                 getEnvironments: '*'
-                type: '${{ github.event.inputs.Environmet_deployment}}'
+                type: '${{ github.event.inputs.Publishing_Stategy}}'
 
             - name: Resolve Environment
               id: ResolveEnvironment
