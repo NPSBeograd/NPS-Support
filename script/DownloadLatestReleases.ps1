@@ -20,6 +20,7 @@ $repositoriesMap = @{"Business-Central-Localization" = $BusinessCentralLocalizat
 $header=New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $header.Add("Authorization", "Bearer $token")
 $header.Add("X-Github-Api-Version", "2022-11-28")
+$header.Add("Accept","")
 function Get-Assets {
     Param (
         [string] $RepositoryName
@@ -27,7 +28,7 @@ function Get-Assets {
 
     $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
     $url = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/latest"
-    $header.Add("Accept", "application/vnd.github+json")
+    $header["Accept"]= "application/vnd.github+json"
 
     $latestRelease = Invoke-RestMethod -Uri $url -Headers $header
 
@@ -39,7 +40,7 @@ function Get-Assets {
 
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
-    $header.Add("Accept", "application/octet-stream")
+    $header["Accept"]= "application/octet-stream"
     Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 }
 
