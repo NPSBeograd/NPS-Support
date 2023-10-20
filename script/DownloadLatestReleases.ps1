@@ -43,6 +43,7 @@ function Get-Assets {
     # Download the first asset
     $header["Accept"] = "application/octet-stream"
     Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
+    Start-Sleep -Seconds 10
 }
 
 for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
