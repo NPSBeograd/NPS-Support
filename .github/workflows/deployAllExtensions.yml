@@ -87,6 +87,7 @@ jobs:
 
  Initialization:
           needs: [Create_secrets]
+
           runs-on: [ windows-latest ]
           outputs:
             telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -117,6 +118,7 @@ jobs:
             - name: Determine Delivery Target Secrets
               id: DetermineDeliveryTargetSecrets
               uses: microsoft/AL-Go-Actions/DetermineDeliveryTargets@v4.0
+
               with:
                 shell: powershell
                 checkContextSecrets: 'N'
@@ -124,6 +126,7 @@ jobs:
             - name: Read secrets
               id: ReadSecrets
               uses: microsoft/AL-Go-Actions/ReadSecrets@v4.0
+
               with:
                 shell: powershell
                 gitHubSecrets: ${{ toJson(secrets) }}
@@ -132,6 +135,7 @@ jobs:
             - name: Determine Delivery Targets
               id: DetermineDeliveryTargets
               uses: microsoft/AL-Go-Actions/DetermineDeliveryTargets@v4.0
+
               env:
                 Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
               with:
@@ -141,6 +145,7 @@ jobs:
             - name: Determine Deployment Environments
               id: DetermineDeploymentEnvironments
               uses: microsoft/AL-Go-Actions/DetermineDeploymentEnvironments@v4.0
+
               env:
                 GITHUB_TOKEN: ${{ github.token }}
               with:
@@ -150,6 +155,7 @@ jobs:
            
  Deploy:
     needs: [Initialization]
+
     runs-on:  [ windows-latest ]
     name: Deploy to ${{ github.event.inputs.Environmet_name }}
     environment:
@@ -161,8 +167,8 @@ jobs:
       - name: Download artifacts
         shell: powershell
         run: |
-
           ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
+
 
       - name: Read settings
         uses: microsoft/AL-Go-Actions/ReadSettings@v4.0
@@ -186,6 +192,7 @@ jobs:
 
       - name: Deploy
         uses: microsoft/AL-Go-Actions/Deploy@v4.0
+
         env:
           Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
         with:
@@ -193,4 +200,5 @@ jobs:
           environmentName: ${{ github.event.inputs.Environmet_name }}
           artifacts: '.artifacts'
           type: '${{ github.event.inputs.Publishing_Stategy}}'
+
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
