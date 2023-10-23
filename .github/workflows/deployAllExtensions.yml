@@ -149,13 +149,13 @@ jobs:
         shell: powershell
         run: |
          $deployment = "${{ github.event.inputs.Environmet_deployment }}"
+         $EnvOutput=""
          if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")){
          $EnvOutput = ./script/ResolveEnvironment.ps1 -Publishing_Stategy ${{ github.event.inputs.Publishing_Stategy}} -Environmet_deployment ${{ github.event.inputs.Environmet_deployment}}
-         echo "::set-env name=ENV_OUTPUT::$EnvOutput"
          }else{
          $EnvOutput = ./script/ResolveEnvironment.ps1 -Publishing_Stategy ${{ github.event.inputs.Publishing_Stategy}}
-         echo "::set-env name=ENV_OUTPUT::$EnvOutput"
          }
+         echo "::set-env name=ENV_OUTPUT::$EnvOutput"
 
       - name: Read settings
         uses: microsoft/AL-Go-Actions/ReadSettings@v4.0
