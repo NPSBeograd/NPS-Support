@@ -73,6 +73,7 @@ jobs:
                  else {
                   $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
                  }
+                  echo $resolvedEnv
                   echo "resolved_Env=$resolvedEnv" >> "$GITHUB_OUTPUT"
               
             - name : Add Settings Environment
