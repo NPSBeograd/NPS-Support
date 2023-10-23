@@ -73,7 +73,7 @@ jobs:
                  else {
                   $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
                  }
-                  echo "resolved_Env=$resolvedEnv" >> "$GITHUB_ENV"
+                  echo "resolved_Env=$resolvedEnv" >> "$GITHUB_OUTPUT"
               
             - name : Add Settings Environment
               shell: powershell
@@ -168,7 +168,7 @@ jobs:
              else {
               $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
              }
-              echo "resolved_Env=$resolvedEnv" >> "$GITHUB_ENV"
+              echo "resolved_Env=$resolvedEnv" >> "$GITHUB_OUTPUT"
           
       - name : Add Settings Environment
         shell: powershell
