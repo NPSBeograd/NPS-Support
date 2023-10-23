@@ -46,7 +46,7 @@ on:
             
 jobs:
 
- Create_secrets:
+ Add_Settings:
     runs-on: windows-latest
 
     steps:
@@ -76,18 +76,8 @@ jobs:
 
         
 
-        - name: Create secrets
-          shell: powershell
-          run: |
-           $deployment = "${{ github.event.inputs.Environmet_deployment }}"
-           if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {
-            ./script/CreateSecrets.ps1 -Token "${{ secrets.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment $deployment -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
-           } else {
-            ./script/CreateSecrets.ps1 -Token "${{ secrets.GHTOKENWORKFLOW }}" -Environmet_name "${{ github.event.inputs.Environmet_name }}" -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
-           }
-
  Initialization:
-          needs: [Create_secrets]
+          needs: [Add_Settings]
 
           runs-on: [ windows-latest ]
           outputs:
