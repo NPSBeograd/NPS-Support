@@ -46,6 +46,8 @@ function Get-Assets {
     Start-Sleep -Seconds 10
 }
 
+Write-Host $repositoriesMap
+
 for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
 
     if ($repositoriesMap[$i].values[0] -eq "true") {
