@@ -46,39 +46,7 @@ on:
             
 jobs:
 
- Add_Settings:
-    runs-on: windows-latest
-
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            lfs: true
-
-        - name: Resolve Environment
-          shell: powershell
-          id: ResolveEnvironment
-          run: |
-           $deployment = "${{ github.event.inputs.Environmet_deployment }}"
-           $resolvedEnv=""
-           if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {
-            $resolvedEnv=./script/ResovleEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"  -Environmet_deployment $deployment
-           }
-           else {
-            $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
-           }
-            echo "resolved_Env=$resolvedEnv" >> "$GITHUB_ENV"
-        
-        - name : Add Settings Environment
-          shell: powershell
-          run: |
-           ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "$resolved_Env"
-
-        
-
  Initialization:
-          needs: [Add_Settings]
-
           runs-on: [ windows-latest ]
           outputs:
             telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -86,11 +54,39 @@ jobs:
             environmentCount: ${{ steps.DetermineDeploymentEnvironments.outputs.EnvironmentCount }}
             deploymentEnvironmentsJson: ${{ steps.DetermineDeploymentEnvironments.outputs.DeploymentEnvironmentsJson }}
             deliveryTargetsJson: ${{ steps.DetermineDeliveryTargets.outputs.DeliveryTargetsJson }}
+            readEnvName: ${{ steps.ReadEnvironmentName.outputs.READ_ENV_NAME }}
           steps:
             - name: Checkout
               uses: actions/checkout@v3
               with:
                 lfs: true
+
+            - name: Resolve Environment
+              shell: powershell
+              id: ResolveEnvironment
+              run: |
+                 $deployment = "${{ github.event.inputs.Environmet_deployment }}"
+                 $resolvedEnv=""
+                 if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {
+                  $resolvedEnv=./script/ResovleEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"  -Environmet_deployment $deployment
+                 }
+                 else {
+                  $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
+                 }
+                  echo "resolved_Env=$resolvedEnv" >> "$GITHUB_ENV"
+              
+            - name : Add Settings Environment
+              shell: powershell
+              run: |
+                 ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "$resolved_Env"
+
+            - name : Read Environment Name
+              shell: powershell
+              id: ReadEnvironmentName
+              run: |
+               $readEnvName=./script/ReadEnvironmentName.ps1
+               echo "READ_ENV_NAME=$readEnvName" >> "$GITHUB_OUTPUT"
+
       
             - name: Initialize the workflow
               id: init
@@ -189,7 +185,7 @@ jobs:
           Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
         with:
           shell: powershell
-          environmentName: ${{ github.event.inputs.Environmet_name }}
+          environmentName: ${{ needs.Initialization.outputs.readEnvName }}
           artifacts: '.artifacts'
           type: '${{ github.event.inputs.Publishing_Stategy}}'
 
