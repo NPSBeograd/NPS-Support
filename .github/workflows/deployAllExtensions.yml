@@ -185,5 +185,5 @@ jobs:
           shell: powershell
           environmentName: ${{ github.event.inputs.Environmet_name }}
           artifacts: '.artifacts'
-          type: '${{ github.event.inputs.Environmet_deployment}}'
+          type: '${{ github.event.inputs.Publishing_Stategy}}'
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
