@@ -21,6 +21,7 @@ $header = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $header.Add("Authorization", "Bearer $token")
 $header.Add("X-Github-Api-Version", "2022-11-28")
 $header.Add("Accept", "")
+
 function Get-Assets {
     Param (
         [string] $RepositoryName
@@ -29,6 +30,7 @@ function Get-Assets {
     $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
     $url = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/latest"
     $header["Accept"] = "application/vnd.github+json"
+
 
     $latestRelease = Invoke-RestMethod -Uri $url -Headers $header
 
@@ -57,6 +59,7 @@ for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
     if ($repositoriesMap[$i].values[0] -eq "true") {
 
         Get-Assets -RepositoryName $repositoriesMap[$i].Keys[0]
+
     }
 }
 

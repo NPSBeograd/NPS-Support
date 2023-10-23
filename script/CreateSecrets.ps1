@@ -68,6 +68,7 @@ Add-Type -AssemblyName System.Security
 
 $url_public_key = "  https://api.github.com/repos/NPSBeograd/NPS-Support/actions/secrets/public-key"
 $header = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+
 $header.Add("Authorization", "Bearer $token")
 $header.Add("Accept", "application/vnd.github+json")
 $header.Add("X-Github-Api-Version", "2022-11-28")
@@ -88,12 +89,14 @@ else {
     }
     elseif ($Environmet_deployment -eq "FAT*") {
         $secret_value_string = "fat"
+
     }
 
 }
 
 
 #$prod_auth= [System.Text.Encoding]::UTF8.GetBytes("PROD_AUTHCONTEXT")
+
 
 
 $secret_value_bytes = [System.Text.Encoding]::UTF8.GetBytes($secret_value_string)
@@ -116,3 +119,4 @@ Write-Host "Creating Secret"
 Invoke-RestMethod -Method Put -Uri $url_secret -Body $body -Headers $header
 
 Write-Host "Secret is created"
+

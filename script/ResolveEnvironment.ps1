@@ -3,6 +3,7 @@ Param(
     [ValidateSet('CD','Publish')]
     [string] $Publishing_Stategy = "CD",
     [Parameter(HelpMessage = "fat or prod", Mandatory = $false)]
+
     [ValidateSet('PROD*','FAT*')]
     [string] $Environmet_deployment
 
