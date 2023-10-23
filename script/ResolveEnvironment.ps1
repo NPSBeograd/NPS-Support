@@ -1,8 +1,9 @@
 Param(
-    [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $false)]
+    [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $true)]
     [ValidateSet('CD','Publish')]
     [string] $Publishing_Stategy = "CD",
-    [Parameter(HelpMessage = "fat or prod", Mandatory = $true)]
+    [Parameter(HelpMessage = "fat or prod", Mandatory = $false)]
+
     [ValidateSet('PROD*','FAT*')]
     [string] $Environmet_deployment
 

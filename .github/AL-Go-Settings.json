@@ -1,0 +1,6 @@
+{
+  "type": "PTE",
+  "templateUrl": "https://github.com/microsoft/AL-Go-PTE@main",
+  "PROD_AuthContextSecretName":"AuthContext",
+  "FAT_AuthContextSecretName":"AuthContext"
+}
