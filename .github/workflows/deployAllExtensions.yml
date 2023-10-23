@@ -155,7 +155,7 @@ jobs:
          }else{
          $EnvOutput = ./script/ResolveEnvironment.ps1 -Publishing_Stategy ${{ github.event.inputs.Publishing_Stategy}}
          }
-         echo "::set-env name=ENV_OUTPUT::$EnvOutput"
+         echo "ENV_TYPE=$EnvOutput" >> "$GITHUB_ENV"
 
       - name: Read settings
         uses: microsoft/AL-Go-Actions/ReadSettings@v4.0
