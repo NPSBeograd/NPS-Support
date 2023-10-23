@@ -18,5 +18,6 @@ if ($Publishing_Stategy -eq "CD"){
         $secret_value_string="FAT"
     }
 }
+Write-Host $secret_value_string
 
 Write-Output $secret_value_string
