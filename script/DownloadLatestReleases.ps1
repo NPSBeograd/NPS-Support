@@ -38,25 +38,24 @@ function Get-Assets {
     # Get the download URL of the first asset
     $assetUrl = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/assets/$($firstAsset.id)"
 
-    Write-Host "Browser url: $($firstAsset.browser_download_url)"
+    Write-Host " Downloading Repository $RepositoryName asset"
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
     $header["Accept"] = "application/octet-stream"
     Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
+
+    Write-Host "Downloading Completed ..."
     Start-Sleep -Seconds 10
 }
 
-Write-Host "$($repositoriesMap | ConvertTo-Json)"
 
-for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
+for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
 
     Write-Host $repositoriesMap[$i] | ConvertTo-Json
     Write-Host $repositoriesMap[$i].values[0]
     Write-Host $repositoriesMap[$i].Keys[0]
     if ($repositoriesMap[$i].values[0] -eq "true") {
 
-        Write-Host $repositoriesMap[$i].Keys[0]
-        Write-Host $repositoriesMap[$i].values[0]
         Get-Assets -RepositoryName $repositoriesMap[$i].Keys[0]
     }
 }
