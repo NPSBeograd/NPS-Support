@@ -63,7 +63,7 @@ jobs:
 
             - name: Resolve Environment
               shell: powershell
-              id: ResolveEnvironment
+              id: ResolveEnvironmentInitialized
               run: |
                  $deployment = "${{ github.event.inputs.Environmet_deployment }}"
                  $resolvedEnv=""
@@ -78,7 +78,7 @@ jobs:
             - name : Add Settings Environment
               shell: powershell
               run: |
-                 ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "$resolved_Env"
+                 ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "${{steps.ResolveEnvironmentInitialized.outputs.resolved_Env}}"
 
             - name : Read Environment Name
               shell: powershell
@@ -158,7 +158,7 @@ jobs:
 
       - name: Resolve Environment
         shell: powershell
-        id: ResolveEnvironment
+        id: ResolveEnvironmentDeploy
         run: |
              $deployment = "${{ github.event.inputs.Environmet_deployment }}"
              $resolvedEnv=""
@@ -173,7 +173,7 @@ jobs:
       - name : Add Settings Environment
         shell: powershell
         run: |
-             ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "$resolved_Env"
+             ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "${{steps.ResolveEnvironmentDeploy.outputs.resolved_Env}}"
 
       - name : Read Environment Name
         shell: powershell
