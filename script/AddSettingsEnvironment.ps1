@@ -3,6 +3,7 @@ Param(
     [string] $ResolvedEnvironmentName
 )
 
+
 # Path to the JSON file
 $jsonFilePath = ".github/AL-Go-Settings.json"
 
