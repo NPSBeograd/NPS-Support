@@ -46,7 +46,7 @@ function Get-Assets {
     Start-Sleep -Seconds 10
 }
 
-Write-Host $repositoriesMap | ConvertTo-Json
+Write-Host "$($repositoriesMap | ConvertTo-Json)"
 
 for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
 
