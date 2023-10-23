@@ -50,6 +50,9 @@ Write-Host $repositoriesMap
 
 for ([int] $i = 0; $i -le $repositoriesMap.Count; $i++) {
 
+    Write-Host $repositoriesMap[$i]
+    Write-Host $repositoriesMap[$i].values[0]
+    Write-Host $repositoriesMap[$i].Keys[0]
     if ($repositoriesMap[$i].values[0] -eq "true") {
 
         Write-Host $repositoriesMap[$i].Keys[0]
