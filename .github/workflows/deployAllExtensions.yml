@@ -47,7 +47,6 @@ on:
 jobs:
 
  Initialization:
-
           runs-on: [ windows-latest ]
           outputs:
             telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
