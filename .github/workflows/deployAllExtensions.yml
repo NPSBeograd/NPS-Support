@@ -157,6 +157,31 @@ jobs:
         run: |
           ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
 
+      - name: Resolve Environment
+        shell: powershell
+        id: ResolveEnvironment
+        run: |
+             $deployment = "${{ github.event.inputs.Environmet_deployment }}"
+             $resolvedEnv=""
+             if ($deployment.StartsWith("PROD") -or $deployment.StartsWith("FAT")) {
+              $resolvedEnv=./script/ResovleEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"  -Environmet_deployment $deployment
+             }
+             else {
+              $resolvedEnv=./script/ResolveEnvironment.ps1 -Publishing_Stategy "${{ github.event.inputs.Publishing_Stategy }}"
+             }
+              echo "resolved_Env=$resolvedEnv" >> "$GITHUB_ENV"
+          
+      - name : Add Settings Environment
+        shell: powershell
+        run: |
+             ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -ResolvedEnvironmentName "$resolved_Env"
+
+      - name : Read Environment Name
+        shell: powershell
+        id: ReadEnvironmentNameDeploy
+        run: |
+           $readEnvName=./script/ReadEnvironmentName.ps1
+           echo "READ_ENV_NAME=$readEnvName" >> "$GITHUB_OUTPUT"
 
       - name: Read settings
         uses: microsoft/AL-Go-Actions/ReadSettings@v4.0
@@ -186,7 +211,7 @@ jobs:
           Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
         with:
           shell: powershell
-          environmentName: ${{ needs.Initialization.outputs.readEnvName }}
+          environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.READ_ENV_NAME }}
           artifacts: '.artifacts'
           type: '${{ github.event.inputs.Publishing_Stategy}}'
 
