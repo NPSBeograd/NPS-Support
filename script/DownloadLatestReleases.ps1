@@ -1,34 +1,17 @@
 Param (
-    [string] $BusinessCentralLocalization,
-    [string] $TravelOrder,
-    [string] $Manufacturing,
-    [string] $EIN,
-    [string] $HrmPayroll,
-    [string] $EinLoc,
-    [string] $Translation,
-    [string] $token
+    [string] $Repository
 )
 
-$repositoriesMap = @(@{"Business-Central-Localization" = $BusinessCentralLocalization },
-    @{"Electronic-Invoicing" = $EIN },
-    @{"Manufacturing-Management" = $Manufacturing },
-    @{"Travel-Order" = $TravelOrder },
-    @{"HRM-and-Payroll" = $HrmPayroll },
-    @{"CON_EIN_NPSLoc" = $EinLoc },
-    @{"Serbian-Translation-W1" = $Translation }
-)
+
 $header = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $header.Add("Authorization", "Bearer $token")
 $header.Add("X-Github-Api-Version", "2022-11-28")
 $header.Add("Accept", "")
 
-function Get-Assets {
-    Param (
-        [string] $RepositoryName
-    )
 
-    $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".$RepositoryName"
-    $url = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/latest"
+
+    $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".$Repository"
+    $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
     $header["Accept"] = "application/vnd.github+json"
 
 
@@ -38,9 +21,9 @@ function Get-Assets {
     $firstAsset = $latestRelease.assets[0]
 
     # Get the download URL of the first asset
-    $assetUrl = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/assets/$($firstAsset.id)"
+    $assetUrl = "https://api.github.com/repos/NPSBeograd/$Repository/releases/assets/$($firstAsset.id)"
 
-    Write-Host " Downloading Repository $RepositoryName asset"
+    Write-Host " Downloading Repository $Repository asset"
     Write-Host "Asset url: " $assetUrl
     # Download the first asset
     $header["Accept"] = "application/octet-stream"
@@ -48,15 +31,3 @@ function Get-Assets {
 
     Write-Host "Downloading Completed ..."
     Start-Sleep -Seconds 10
-}
-
-
-for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
-
-    if ($repositoriesMap[$i].values[0] -eq "true") {
-
-        Get-Assets -RepositoryName $repositoriesMap[$i].Keys[0]
-
-    }
-}
-
