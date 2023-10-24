@@ -128,7 +128,7 @@ jobs:
     needs: [Initialization]
 
     runs-on: [windows-latest]
-    name: Deploy to ${{ github.event.inputs.Environmet_name }}
+    name: Deploy to ${{ github.event.inputs.Environmet_name }} ${{matrix.folder}} extension
     strategy: 
       matrix:
         folder: ${{fromJSON(needs.Initialization.outputs.resolvedArtifactFoldersJsonMatrix)}} 
