@@ -10,7 +10,7 @@ $header.Add("X-Github-Api-Version", "2022-11-28")
 $header.Add("Accept", "")
 
 
-
+    Write-Host $Repository
     $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".$Repository"
     $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
     $header["Accept"] = "application/vnd.github+json"
