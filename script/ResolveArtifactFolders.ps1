@@ -30,4 +30,5 @@ for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
     }
 }
 
-Write-Output $ExtToInstall
+$ResolvedArtifactFoldersJson = ConvertTo-Json -InputObject $ExtToInstall -compress
+Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "ResolvedArtifactFoldersJson=$ResolvedArtifactFoldersJson"
