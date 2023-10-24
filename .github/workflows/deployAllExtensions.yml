@@ -124,6 +124,7 @@ jobs:
           type: "${{ github.event.inputs.Publishing_Stategy}}"
 
   Deploy:
+
     needs: [Initialization]
 
     runs-on: [windows-latest]
@@ -185,5 +186,6 @@ jobs:
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
           artifacts: ${{matrix.folder}}
           type: "${{ github.event.inputs.Publishing_Stategy}}"
+
 
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
