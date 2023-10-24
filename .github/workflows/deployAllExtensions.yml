@@ -142,7 +142,7 @@ jobs:
       - name: Download artifacts
         shell: powershell
         run: |
-          ./script/DownloadLatestReleases.ps1 -Repository  ${{matrix.folder}}
+          ./script/DownloadLatestReleases.ps1 -Repository  ${{matrix.folder}} -token ${{secrets.GHTOKENWORKFLOW}}
 
       - name : Add Settings Environment
         shell: powershell

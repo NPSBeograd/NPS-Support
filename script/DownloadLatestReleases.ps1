@@ -1,5 +1,6 @@
 Param (
-    [string] $Repository
+    [string] $Repository,
+    [string] $token
 )
 
 
