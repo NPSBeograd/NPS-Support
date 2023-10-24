@@ -52,6 +52,7 @@ jobs:
       environmentCount: ${{ steps.DetermineDeploymentEnvironments.outputs.EnvironmentCount }}
       deploymentEnvironmentsJson: ${{ steps.DetermineDeploymentEnvironments.outputs.DeploymentEnvironmentsJson }}
       deliveryTargetsJson: ${{ steps.DetermineDeliveryTargets.outputs.DeliveryTargetsJson }}
+      resolvedArtifactFoldersJsonMatrix: ${{ steps.ResolveArtifactFolder.outputs.ResolvedArtifactFoldersJson }}
 
     steps:
       - name: Checkout
@@ -64,6 +65,13 @@ jobs:
         run: |
           ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}"
 
+      - name: Resolve artifact folders
+        id: ResolveArtifactFolder
+        shell: powershell
+        run: |
+            $ResolvedArtifactFoldersJson=./script/ResolveArtifactFolders.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}}
+            Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "ResolvedArtifactFoldersJson=$ResolvedArtifactFoldersJson"
+     
       - name: Initialize the workflow
         uses: microsoft/AL-Go-Actions/WorkflowInitialize@v4.0
         with:
@@ -120,6 +128,10 @@ jobs:
 
     runs-on: [windows-latest]
     name: Deploy to ${{ github.event.inputs.Environmet_name }}
+    strategy: 
+      matrix:
+        folder: ${{fromJSON(needs.Initialization.outputs.resolvedArtifactFoldersJsonMatrix)}} 
+
     environment:
       name: ${{ github.event.inputs.Environmet_name }}
     steps:
@@ -171,7 +183,7 @@ jobs:
         with:
           shell: powershell
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
-          artifacts: ".artifacts"
+          artifacts: ${{matrix.folder}}
           type: "${{ github.event.inputs.Publishing_Stategy}}"
 
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}

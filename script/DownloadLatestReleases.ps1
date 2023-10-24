@@ -27,7 +27,7 @@ function Get-Assets {
         [string] $RepositoryName
     )
 
-    $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
+    $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".$RepositoryName"
     $url = "https://api.github.com/repos/NPSBeograd/$RepositoryName/releases/latest"
     $header["Accept"] = "application/vnd.github+json"
 
@@ -53,9 +53,6 @@ function Get-Assets {
 
 for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
 
-    Write-Host $repositoriesMap[$i] | ConvertTo-Json
-    Write-Host $repositoriesMap[$i].values[0]
-    Write-Host $repositoriesMap[$i].Keys[0]
     if ($repositoriesMap[$i].values[0] -eq "true") {
 
         Get-Assets -RepositoryName $repositoriesMap[$i].Keys[0]
