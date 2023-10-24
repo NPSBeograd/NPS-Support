@@ -30,4 +30,4 @@ for ([int] $i = 0; $i -lt $repositoriesMap.Count; $i++) {
     }
 }
 
-Write-Output $($ExtToInstall| ConvertTo-Json)
+Write-Output $ExtToInstall
