@@ -52,6 +52,8 @@ jobs:
       environmentCount: ${{ steps.DetermineDeploymentEnvironments.outputs.EnvironmentCount }}
       deploymentEnvironmentsJson: ${{ steps.DetermineDeploymentEnvironments.outputs.DeploymentEnvironmentsJson }}
       deliveryTargetsJson: ${{ steps.DetermineDeliveryTargets.outputs.DeliveryTargetsJson }}
+      resolvedArtifactFoldersJsonMatrix: ${{ steps.ResolveArtifactFolder.outputs.ResolvedArtifactFoldersJson }}
+
 
     steps:
       - name: Checkout
@@ -63,6 +65,12 @@ jobs:
         shell: powershell
         run: |
           ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}"
+
+      - name: Resolve artifact folders
+        id: ResolveArtifactFolder
+        shell: powershell
+        run: |
+            ./script/ResolveArtifactFolders.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}}
 
       - name: Initialize the workflow
         uses: microsoft/AL-Go-Actions/WorkflowInitialize@v4.0
@@ -120,7 +128,11 @@ jobs:
     needs: [Initialization]
 
     runs-on: [windows-latest]
-    name: Deploy to ${{ github.event.inputs.Environmet_name }}
+    name: Deploy to ${{ github.event.inputs.Environmet_name }} ${{matrix.folder}} extension
+    strategy: 
+      matrix:
+        folder: ${{fromJSON(needs.Initialization.outputs.resolvedArtifactFoldersJsonMatrix)}} 
+
     environment:
       name: ${{ github.event.inputs.Environmet_name }}
     steps:
@@ -130,7 +142,7 @@ jobs:
       - name: Download artifacts
         shell: powershell
         run: |
-          ./script/DownloadLatestReleases.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}} -token ${{ SECRETS.GHTOKENWORKFLOW}}
+          ./script/DownloadLatestReleases.ps1 -Repository  ${{matrix.folder}} -token ${{secrets.GHTOKENWORKFLOW}}
 
       - name : Add Settings Environment
         shell: powershell
@@ -172,7 +184,8 @@ jobs:
         with:
           shell: powershell
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
-          artifacts: ".artifacts"
+          artifacts: .${{matrix.folder}}
+
           type: "${{ github.event.inputs.Publishing_Stategy}}"
 
 
