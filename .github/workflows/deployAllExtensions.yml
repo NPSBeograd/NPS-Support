@@ -148,8 +148,17 @@ jobs:
 
       - name: Download artifacts
         shell: powershell
+        id: download-artifacts
         run: |
           ./script/DownloadLatestReleases.ps1 -Repository  ${{matrix.folder}} -token ${{secrets.GHTOKENWORKFLOW}}
+
+      - name: Upload artifacts - apps
+        uses: actions/upload-artifact@v3
+        with:
+            name: ${{ steps.download-artifacts.outputs.DownloadedArtifactName }}
+            path: "./.${{matrix.folder}}/"
+            if-no-files-found: ignore
+            retention-days: 1
 
       - name : Add Settings Environment
         shell: powershell
@@ -193,9 +202,12 @@ jobs:
           shell: powershell
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
           artifacts: '.${{matrix.folder}}'
-
-
           type: "${{ github.event.inputs.Publishing_Stategy}}"
-
-
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
+
+
+      - name: remove artifacts
+        uses: kolpav/purge-artifacts-action@v1
+        with:
+            token: ${{ secrets.GITHUB_TOKEN}}
+            expire-in: 0days # Set this to 0 to delete all artifacts
