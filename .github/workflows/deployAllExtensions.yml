@@ -183,12 +183,6 @@ jobs:
           gitHubSecrets: ${{ toJson(secrets) }}
           getSecrets: "${{ steps.envName.outputs.envName }}-AuthContext,${{ steps.envName.outputs.envName }}_AuthContext,AuthContext,${{ steps.envName.outputs.envName }}-EnvironmentName,${{ steps.envName.outputs.envName }}_EnvironmentName,EnvironmentName,projects"
 
-      - name: echo deployments
-        run: |
-
-          echo "${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}"
-
-
       - name: Deploy
         uses: microsoft/AL-Go-Actions/Deploy@v4.0
 
