@@ -54,7 +54,6 @@ jobs:
       deliveryTargetsJson: ${{ steps.DetermineDeliveryTargets.outputs.DeliveryTargetsJson }}
       resolvedArtifactFoldersJsonMatrix: ${{ steps.ResolveArtifactFolder.outputs.ResolvedArtifactFoldersJson }}
 
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -70,7 +69,7 @@ jobs:
         id: ResolveArtifactFolder
         shell: powershell
         run: |
-            ./script/ResolveArtifactFolders.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}}
+          ./script/ResolveArtifactFolders.ps1 -BusinessCentralLocalization ${{github.event.inputs.BusinessCentralLocalization}} -TravelOrder ${{github.event.inputs.TravelOrder}} -Manufacturing ${{github.event.inputs.Manufacturing}} -EIN ${{github.event.inputs.EIN}} -HrmPayroll ${{github.event.inputs.HrmPayroll}} -EinLoc ${{github.event.inputs.EinLoc}}  -Translation ${{github.event.inputs.Translation}}
 
       - name: Initialize the workflow
         uses: microsoft/AL-Go-Actions/WorkflowInitialize@v4.0
@@ -123,17 +122,14 @@ jobs:
           getEnvironments: "*"
           type: "${{ github.event.inputs.Publishing_Stategy}}"
 
-      
-
   Deploy:
-
     needs: [Initialization]
 
     runs-on: [windows-latest]
     name: Deploy to ${{ github.event.inputs.Environmet_name }} ${{matrix.folder}} extension
-    strategy: 
+    strategy:
       matrix:
-        folder: ${{fromJSON(needs.Initialization.outputs.resolvedArtifactFoldersJsonMatrix)}} 
+        folder: ${{fromJSON(needs.Initialization.outputs.resolvedArtifactFoldersJsonMatrix)}}
 
     environment:
       name: ${{ github.event.inputs.Environmet_name }}
@@ -148,13 +144,22 @@ jobs:
 
       - name: Download artifacts
         shell: powershell
+        id: download-artifacts
         run: |
           ./script/DownloadLatestReleases.ps1 -Repository  ${{matrix.folder}} -token ${{secrets.GHTOKENWORKFLOW}}
 
-      - name : Add Settings Environment
+      - name: Upload artifacts - apps
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.download-artifacts.outputs.DownloadedArtifactName }}
+          path: "./.${{matrix.folder}}/"
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Add Settings Environment
         shell: powershell
         run: |
-             ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}"
+          ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}"
 
       - name: Read Environment Name
         shell: powershell
@@ -191,10 +196,13 @@ jobs:
         with:
           shell: powershell
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
-          artifacts: '.${{matrix.folder}}'
-
-
+          artifacts: ".${{matrix.folder}}"
           type: "${{ github.event.inputs.Publishing_Stategy}}"
-
-
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
+
+      - name: remove artifacts
+        uses: kolpav/purge-artifacts-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN}}
+
+          expire-in: 0days # Set this to 0 to delete all artifacts
