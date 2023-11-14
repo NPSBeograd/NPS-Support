@@ -30,5 +30,5 @@ $header.Add("Accept", "")
     $header["Accept"] = "application/octet-stream"
     Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 
-    Write-Host "Downloading Completed ..."
+    Write-Host "Downloading Completed in folder $donwloadFolder..."
     Start-Sleep -Seconds 10
