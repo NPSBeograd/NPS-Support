@@ -139,6 +139,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Add Settings Environment
+        shell: powershell
+        run: |
+          ./script/AddSettingsEnvironment.ps1 -EnvironmentName "${{ github.event.inputs.Environmet_name }}" -Environmet_deployment "${{ github.event.inputs.Environmet_deployment}}"
+
       - name: Download artifacts
         shell: powershell
         run: |
