@@ -199,6 +199,7 @@ jobs:
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
           artifacts: '.${{matrix.folder}}'
 
+
           type: "${{ github.event.inputs.Publishing_Stategy}}"
 
 
