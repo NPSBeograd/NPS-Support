@@ -1,6 +1,7 @@
 
 
 
+
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath ".\AL-Go-Helper.ps1" -Resolve)
     DownloadAndImportBcContainerHelper
@@ -10,6 +11,7 @@ try {
     $artifacts= $Env:artifacts
     $token= $Env:token
     $deploymentEnvironments = $Env:deploymentEnvironmentsJson | ConvertFrom-Json | ConvertTo-HashTable -recurse
+
     $deploymentSettings = $deploymentEnvironments."$environmentName"
     $envName = $environmentName.Split(' ')[0]
     $secrets = $env:Secrets | ConvertFrom-Json
