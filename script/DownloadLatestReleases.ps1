@@ -30,7 +30,8 @@ Write-Host "Asset url: " $assetUrl
 $header["Accept"] = "application/octet-stream"
 Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
 
-$downloadName = ls $donwloadFolder
+$downloadName = ls $("$donwloadFolder/")
+Write-Host $downloadName
 Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "DownloadedArtifactName=$downloadName"
 
 Write-Host "Downloading Completed in folder $donwloadFolder..."
