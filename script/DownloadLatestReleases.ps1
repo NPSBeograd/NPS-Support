@@ -17,7 +17,7 @@ New-Item -ItemType Directory -Path $donwloadFolder
 # Set access permissions for all users
 $acl = Get-Acl -Path $donwloadFolder
 $acl.SetAccessRuleProtection($true, $false)
-$rule = New-Object System.Security.AccessControl.FileSystemAccessRule("*", "FullControl", "Allow")
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Users", "FullControl", "Allow")
 $acl.AddAccessRule($rule)
 Set-Acl -Path $donwloadFolder -AclObject $acl
 
