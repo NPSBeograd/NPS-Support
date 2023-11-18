@@ -11,7 +11,7 @@ $header.Add("Accept", "")
 
 
 Write-Host $Repository
-$donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE ".$Repository"
+$donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE "$Repository"
 New-Item -Path $donwloadFolder -ItemType Directory
 $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
 $header["Accept"] = "application/vnd.github+json"
