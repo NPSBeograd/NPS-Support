@@ -141,6 +141,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+
+      - name: Create Folder in Workspace
+        run: mkdir "${{ github.workspace }}/${{matrix.folder}}"
+
+      - name: Set Permissions
+        run: chmod 755 "${{ github.workspace }}/${{matrix.folder}}"
+
       - name: Add Settings Environment
         shell: powershell
         run: |
@@ -156,7 +163,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
             name: ${{ steps.download-artifacts.outputs.DownloadedArtifactName }}
-            path: ${{ github.workspace}}
+            path: ${{ github.workspace}}/${{matrix.folder}}
             if-no-files-found: ignore
             retention-days: 1
 
