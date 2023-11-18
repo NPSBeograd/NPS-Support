@@ -208,7 +208,7 @@ jobs:
           Secrets: "${{ steps.ReadSecrets.outputs.Secrets }}"
           deploymentEnvironmentsJson: '${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}'
           type: "${{ github.event.inputs.Publishing_Stategy}}"
-          artifacts: '${{matrix.folder}}'
+          artifacts: '${{github.workspace}}/${{matrix.folder}}'
           environmentName: '${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}'
           token: ${{secrets.GHTOKENWORKFLOW}}
        
