@@ -32,8 +32,8 @@ Write-Host "File path: $filePath"
 $header["Accept"] = "application/octet-stream"
 Invoke-WebRequest -Uri $assetUrl -OutFile $filePath  -Headers $header -Method Get
 
+ls $donwloadFolder
 $downloadName = "$Repository.zip"
-Write-Host $downloadName
 
 Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "DownloadedArtifactName=$downloadName"
 
