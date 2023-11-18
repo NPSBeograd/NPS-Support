@@ -32,7 +32,7 @@ Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Met
 
 Write-Host $donwloadFolder
 
-$downloadName = ls $("$donwloadFolder/")
+$downloadName = ls $("$donwloadFolder")
 Write-Host $downloadName
 Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "DownloadedArtifactName=$downloadName"
 
