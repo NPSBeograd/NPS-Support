@@ -10,19 +10,8 @@ $header.Add("X-Github-Api-Version", "2022-11-28")
 $header.Add("Accept", "")
 
 
-$username = $env:USERNAME
 
 $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE "$Repository"
-# Create a folder
-New-Item -ItemType Directory -Path $donwloadFolder
-# Set access permissions for all users
-$acl = Get-Acl -Path $donwloadFolder
-$acl.SetAccessRuleProtection($true, $false)
-$rule = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Users", "FullControl", "Allow")
-$acl.AddAccessRule($rule)
-Set-Acl -Path $donwloadFolder -AclObject $acl
-
-icacls "D:\a\NPS-Support\NPS-Support\Business-Central-Localization" /grant:r "$($username):(OI)(CI)F"
 
 $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
 $header["Accept"] = "application/vnd.github+json"
@@ -40,13 +29,13 @@ Write-Host " Downloading Repository $Repository asset"
 Write-Host "Asset url: " $assetUrl
 # Download the first asset
 $header["Accept"] = "application/octet-stream"
-Invoke-WebRequest -Uri $assetUrl -OutFile  $donwloadFolder -Headers $header -Method Get
+Invoke-WebRequest -Uri $assetUrl -OutFile  $("$donwloadFolder/$donwloadFolder.zip") -Headers $header -Method Get
 
 Write-Host $donwloadFolder
 
-$downloadName = ls $("$donwloadFolder")
+$downloadName = ls $donwloadFolder
 Write-Host $downloadName
+
 Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "DownloadedArtifactName=$downloadName"
 
 Write-Host "Downloading Completed in folder $donwloadFolder..."
-Start-Sleep -Seconds 10
