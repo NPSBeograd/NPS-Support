@@ -12,7 +12,15 @@ $header.Add("Accept", "")
 
 Write-Host $Repository
 $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE "$Repository"
-New-Item -Path $donwloadFolder -ItemType Directory
+# Create a folder
+New-Item -ItemType Directory -Path $donwloadFolder
+# Set access permissions for all users
+$acl = Get-Acl -Path $donwloadFolder
+$acl.SetAccessRuleProtection($true, $false)
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule("*", "FullControl", "Allow")
+$acl.AddAccessRule($rule)
+Set-Acl -Path $donwloadFolder -AclObject $acl
+
 $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
 $header["Accept"] = "application/vnd.github+json"
 
