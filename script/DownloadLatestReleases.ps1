@@ -24,7 +24,7 @@ $firstAsset = $latestRelease.assets[0]
 
 # Get the download URL of the first asset
 $assetUrl = "https://api.github.com/repos/NPSBeograd/$Repository/releases/assets/$($firstAsset.id)"
-$filePath= $("$donwloadFolder/$donwloadFolder.zip")
+$filePath= $("$donwloadFolder/$Repository.zip")
 Write-Host " Downloading Repository $Repository asset"
 Write-Host "Asset url: " $assetUrl
 Write-Host "File path: $filePath"
