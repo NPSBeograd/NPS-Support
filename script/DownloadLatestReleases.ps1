@@ -24,14 +24,13 @@ $firstAsset = $latestRelease.assets[0]
 
 # Get the download URL of the first asset
 $assetUrl = "https://api.github.com/repos/NPSBeograd/$Repository/releases/assets/$($firstAsset.id)"
-
+$filePath= $("$donwloadFolder/$donwloadFolder.zip")
 Write-Host " Downloading Repository $Repository asset"
 Write-Host "Asset url: " $assetUrl
+Write-Host "File path: $filePath"
 # Download the first asset
 $header["Accept"] = "application/octet-stream"
-Invoke-WebRequest -Uri $assetUrl -OutFile  $("$donwloadFolder/$donwloadFolder.zip") -Headers $header -Method Get
-
-Write-Host $donwloadFolder
+Invoke-WebRequest -Uri $assetUrl -OutFile $filePath  -Headers $header -Method Get
 
 $downloadName = ls $donwloadFolder
 Write-Host $downloadName
