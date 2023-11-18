@@ -141,6 +141,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+
+      - name: Create Folder in Workspace
+        run: mkdir "${{ github.workspace }}/${{matrix.folder}}"
+
+      - name: Set Permissions
+        run: chmod 755 "${{ github.workspace }}/${{matrix.folder}}"
+
       - name: Add Settings Environment
         shell: powershell
         run: |
@@ -156,7 +163,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
             name: ${{ steps.download-artifacts.outputs.DownloadedArtifactName }}
-            path: "./.${{matrix.folder}}/"
+            path: ${{ github.workspace}}/${{matrix.folder}}
             if-no-files-found: ignore
             retention-days: 1
 
@@ -200,10 +207,16 @@ jobs:
         with:
           shell: powershell
           environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
-          artifacts: '.${{matrix.folder}}'
+          artifacts: '${{matrix.folder}}'
           type: "${{ github.event.inputs.Publishing_Stategy}}"
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
 
+  Remove-artifacts:
+    needs: [Deploy]
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: remove artifacts
         uses: kolpav/purge-artifacts-action@v1
