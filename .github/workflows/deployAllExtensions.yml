@@ -211,6 +211,12 @@ jobs:
           type: "${{ github.event.inputs.Publishing_Stategy}}"
           deploymentEnvironmentsJson: ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}
 
+  Remove-artifacts:
+    needs: [Deploy]
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: remove artifacts
         uses: kolpav/purge-artifacts-action@v1
