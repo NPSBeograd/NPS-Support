@@ -11,7 +11,7 @@ $header.Add("Accept", "")
 
 
 
-$donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE "$Repository"
+$donwloadFolder =  $ENV:GITHUB_WORKSPACE
 
 $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
 $header["Accept"] = "application/vnd.github+json"
@@ -32,7 +32,7 @@ Write-Host "File path: $filePath"
 $header["Accept"] = "application/octet-stream"
 Invoke-WebRequest -Uri $assetUrl -OutFile $filePath  -Headers $header -Method Get
 
-$downloadName = ls $donwloadFolder
+$downloadName = "$Repository.zip"
 Write-Host $downloadName
 
 Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "DownloadedArtifactName=$downloadName"
