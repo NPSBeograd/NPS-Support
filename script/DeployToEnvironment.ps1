@@ -1,24 +1,15 @@
-Param(
-    [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $false)]
-    [string] $token,
-    [Parameter(HelpMessage = "Name of environment to deploy to", Mandatory = $true)]
-    [string] $environmentName,
-    [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
-    [string] $artifacts,
-    [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $false)]
-    [ValidateSet('CD','Publish')]
-    [string] $type = "CD",
-    [Parameter(HelpMessage = "The settings for all Deployment Environments", Mandatory = $true)]
-    [string] $deploymentEnvironmentsJson
-)
+
 
 
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath ".\AL-Go-Helper.ps1" -Resolve)
     DownloadAndImportBcContainerHelper
 
-
-    $deploymentEnvironments = $deploymentEnvironmentsJson | ConvertFrom-Json | ConvertTo-HashTable -recurse
+    $type = $Env:type
+    $environmentName= $Env:environmentName
+    $artifacts= $Env:artifacts
+    $token= $Env:token
+    $deploymentEnvironments = $Env:deploymentEnvironmentsJson | ConvertFrom-Json | ConvertTo-HashTable -recurse
     $deploymentSettings = $deploymentEnvironments."$environmentName"
     $envName = $environmentName.Split(' ')[0]
     $secrets = $env:Secrets | ConvertFrom-Json

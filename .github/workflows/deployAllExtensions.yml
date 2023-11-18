@@ -202,10 +202,15 @@ jobs:
       - name: Deploy
         shell: powershell
         run: |
-          ./script/DeployToEnvironment.ps1 -deploymentEnvironmentsJson ${{ needs.Initialization.outputs.deploymentEnvironmentsJson }} -type "${{ github.event.inputs.Publishing_Stategy}}" -artifacts: '${{matrix.folder}}' -environmentName: ${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}
+          ./script/DeployToEnvironment.ps1
 
         env:
           Secrets: "${{ steps.ReadSecrets.outputs.Secrets }}"
+          deploymentEnvironmentsJson: '${{ needs.Initialization.outputs.deploymentEnvironmentsJson }}'
+          type: "${{ github.event.inputs.Publishing_Stategy}}"
+          artifacts: '${{matrix.folder}}'
+          environmentName: '${{ steps.ReadEnvironmentNameDeploy.outputs.readEnvName }}'
+          token: ${{secrets.GHTOKENWORKFLOW}}
        
 
   Remove-artifacts:
