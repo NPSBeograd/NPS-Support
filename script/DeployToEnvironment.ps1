@@ -1,8 +1,6 @@
 Param(
     [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $false)]
     [string] $token,
-    [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
-    [string] $parentTelemetryScopeJson = '7b7d',
     [Parameter(HelpMessage = "Name of environment to deploy to", Mandatory = $true)]
     [string] $environmentName,
     [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
@@ -14,14 +12,11 @@ Param(
     [string] $deploymentEnvironmentsJson
 )
 
-$telemetryScope = $null
 
 try {
-    . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
+    . (Join-Path -Path $PSScriptRoot -ChildPath ".\AL-Go-Helper.ps1" -Resolve)
     DownloadAndImportBcContainerHelper
 
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
-    $telemetryScope = CreateScope -eventId 'DO0075' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     $deploymentEnvironments = $deploymentEnvironmentsJson | ConvertFrom-Json | ConvertTo-HashTable -recurse
     $deploymentSettings = $deploymentEnvironments."$environmentName"
@@ -57,91 +52,24 @@ try {
     $artifacts = $artifacts.Replace('/',([System.IO.Path]::DirectorySeparatorChar)).Replace('\',([System.IO.Path]::DirectorySeparatorChar))
 
     $apps = @()
-    $artifactsFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
-    $artifactsFolderCreated = $false
-    if ($artifacts -eq ".artifacts") {
-        $artifacts = $artifactsFolder
-    }
+   
 
-    $searchArtifacts = $false
     if ($artifacts -like "$($ENV:GITHUB_WORKSPACE)*") {
-        if (Test-Path $artifacts -PathType Container) {
-            $deploymentSettings.Projects.Split(',') | ForEach-Object {
-                $project = $_.Replace('\','_').Replace('/','_')
-                $refname = "$ENV:GITHUB_REF_NAME".Replace('/','_')
-                Write-Host "project '$project'"
-                $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Apps-*.*.*.*") | ForEach-Object { $_.FullName })
-                if (!($apps)) {
-                    throw "There is no artifacts present in $artifacts matching $project-$refname-Apps-<version>."
-                }
-                $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Dependencies-*.*.*.*") | ForEach-Object { $_.FullName })
-            }
-        }
+       
+                $apps += @((Get-ChildItem -Path $artifacts ) | ForEach-Object { $_.FullName })
+    }
         elseif (Test-Path $artifacts) {
             $apps = $artifacts
         }
         else {
             throw "Artifact $artifacts was not found. Make sure that the artifact files exist and files are not corrupted."
         }
+    }catch {
+        Write-Host "$_"
     }
-    elseif ($artifacts -eq "current" -or $artifacts -eq "prerelease" -or $artifacts -eq "draft") {
-        # latest released version
-        $releases = GetReleases -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY
-        if ($releases) {
-            if ($artifacts -eq "current") {
-                $release = $releases | Where-Object { -not ($_.prerelease -or $_.draft) } | Select-Object -First 1
-            }
-            elseif ($artifacts -eq "prerelease") {
-                $release = $releases | Where-Object { -not ($_.draft) } | Select-Object -First 1
-            }
-            elseif ($artifacts -eq "draft") {
-                $release = $releases | Select-Object -First 1
-            }
-            if (!($release)) {
-                throw "Unable to locate $artifacts release"
-            }
-            New-Item $artifactsFolder -ItemType Directory | Out-Null
-            $artifactsFolderCreated = $true
-            DownloadRelease -token $token -projects $deploymentSettings.Projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Apps"
-            DownloadRelease -token $token -projects $deploymentSettings.Projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Dependencies"
-            $apps = @((Get-ChildItem -Path $artifactsFolder) | ForEach-Object { $_.FullName })
-            if (!$apps) {
-                throw "Artifact $artifacts was not found on any release. Make sure that the artifact files exist and files are not corrupted."
-            }
-        }
-        else {
-            if ($artifacts -eq "current") {
-                Write-Host "::Warning::Current release was specified, but no releases were found. Searching for latest build artifacts instead."
-                $artifacts = "latest"
-                $searchArtifacts = $true
-            }
-            else {
-                throw "Artifact $artifacts was not found on any release."
-            }
-        }
-    }
-    else {
-        $searchArtifacts = $true
-    }
+  
 
-    if ($searchArtifacts) {
-        New-Item $artifactsFolder -ItemType Directory | Out-Null
-        $refname = "$ENV:GITHUB_REF_NAME".Replace('/','_')
-        $allArtifacts = @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Apps" -projects $deploymentSettings.Projects -Version $artifacts -branch $refname)
-        $allArtifacts += @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Dependencies" -projects $deploymentSettings.Projects -Version $artifacts -branch $refname)
-        if ($allArtifacts) {
-            $allArtifacts | ForEach-Object {
-                $appFile = DownloadArtifact -token $token -artifact $_ -path $artifactsFolder
-                if (!(Test-Path $appFile)) {
-                    throw "Unable to download artifact $($_.name)"
-                }
-                $apps += @($appFile)
-            }
-        }
-        else {
-            throw "Could not find any Apps artifacts for projects $($deploymentSettings.Projects), version $artifacts"
-        }
-    }
+
 
     Write-Host "Apps to deploy"
     $apps | Out-Host
@@ -233,12 +161,5 @@ try {
         Remove-Item $artifactsFolder -Recurse -Force
     }
 
-    TrackTrace -telemetryScope $telemetryScope
 
-}
-catch {
-    if (Get-Module BcContainerHelper) {
-        TrackException -telemetryScope $telemetryScope -errorRecord $_
-    }
-    throw
-}
+
