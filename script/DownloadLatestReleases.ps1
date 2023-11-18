@@ -10,7 +10,8 @@ $header.Add("X-Github-Api-Version", "2022-11-28")
 $header.Add("Accept", "")
 
 
-Write-Host $Repository
+$username = $env:USERNAME
+
 $donwloadFolder = Join-Path $ENV:GITHUB_WORKSPACE "$Repository"
 # Create a folder
 New-Item -ItemType Directory -Path $donwloadFolder
@@ -20,6 +21,8 @@ $acl.SetAccessRuleProtection($true, $false)
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Users", "FullControl", "Allow")
 $acl.AddAccessRule($rule)
 Set-Acl -Path $donwloadFolder -AclObject $acl
+
+icacls "D:\a\NPS-Support\NPS-Support\Business-Central-Localization" /grant:r "$($username):(OI)(CI)F"
 
 $url = "https://api.github.com/repos/NPSBeograd/$Repository/releases/latest"
 $header["Accept"] = "application/vnd.github+json"
