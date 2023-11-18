@@ -148,9 +148,7 @@ try {
         }
     }
 
-    if ($artifactsFolderCreated) {
-        Remove-Item $artifactsFolder -Recurse -Force
-    }
+
 
 
 
