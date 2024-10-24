@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 (module.exports = {
   title: 'My Site',
   tagline: 'Dinosaurs are cool',
-  url: 'https://NPSBeograd/',
+  url: 'https://npsbeograd.github.io',
   baseUrl: '/NPS-Support/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',

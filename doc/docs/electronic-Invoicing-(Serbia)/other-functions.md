@@ -1,6 +1,7 @@
 ---
 sidebar_position: 4
 ---
+
 # Other functions
 
 ## **1.Send Sales Invoices**

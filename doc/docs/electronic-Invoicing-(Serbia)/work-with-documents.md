@@ -114,7 +114,6 @@ The process of creating a prepayment invoice remains unchanged. The header of th
 
 The creation of a credit memo also remains unchanged. If the memo is created by copying the sales invoice, in the credit memo header, the field called "Applies-to Doc. No” is filled out with the invoice number to be reversed/accepted. The same number that is filled in Applies-to Doc. No will be filled in independently in the Electronic Invoicing section in the Source Invoice No field.
 
-![1729693886965](image/work-with-documents/1729693886965.png)
 
 Date Period - enter the date or previous (months). Date Period will be filled in if we do not have filled in Source Invoice No. When we have the Invoice Source field filled in, we don't need to fill in the Date Period field.
 

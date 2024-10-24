@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 ---
-# **Settings**
+# Settings
 
 ## **1. Obtaining of API key**
 
