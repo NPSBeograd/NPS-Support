@@ -22,13 +22,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/NPSBeograd/NPS-Support/edit/main/website/',
+          editUrl: 'https://github.com/NPSBeograd/NPS-Support/edit/main/doc/docs/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/NPSBeograd/NPS-Support/edit/main/website/blog/',
+            'https://github.com/NPSBeograd/NPS-Support/edit/main/doc/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
