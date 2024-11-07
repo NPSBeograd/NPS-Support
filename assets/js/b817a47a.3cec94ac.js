@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdoc_support=self.webpackChunkdoc_support||[]).push([[1798],{971:p=>{p.exports=JSON.parse('{"allTagsPath":"/NPS-Support/blog/tags","slug":"/NPS-Support/blog/tags/hello","name":"hello","count":2,"permalink":"/NPS-Support/blog/tags/hello"}')}}]);
