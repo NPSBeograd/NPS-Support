@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # EPE - Banking and Electronic Payment
 
 ## Set up bank accounts
