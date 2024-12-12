@@ -39,7 +39,12 @@ body:
         - Advanced Manufacturing COst Calculation
         - Travel Expenses
         - Serbian Language
+        - HRM-Payroll and TravelExpenses Connector
+        - Payment Discounts
+        - Sales Price Inventory Value
       default: 0
+    validations:
+        required: true
   - type: textarea
     id: logs
     attributes:
