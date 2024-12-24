@@ -43,8 +43,6 @@ body:
         - Payment Discounts
         - Sales Price Inventory Value
       default: 0
-    validations:
-        required: true
   - type: textarea
     id: logs
     attributes:

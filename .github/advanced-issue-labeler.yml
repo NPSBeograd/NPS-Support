@@ -1,0 +1,25 @@
+policy:
+  - section:
+      - id: [extension]
+        block-list: ['None', 'Other']
+        label:
+          - name: 'LOC'
+            keys: ['Localization features']
+          - name: 'PyR'
+            keys: ['HRM and Payroll']
+          - name: 'ELC'
+            keys: ['Electonic Invoicing and Localization Connector']
+          - name: 'TRL'
+            keys: ['Serbian Language']
+          - name: 'TRO'
+            keys: ['Travel Expenses']
+          - name: 'MFM'
+            keys: ['Advanced Manufacturing COst Calculation']
+          - name: 'SPI'
+            keys: ['Sales Price Inventory Value']
+          - name: 'EIN'
+            keys: ['Electronic Invoicing']
+          - name: 'PyD'
+            keys: ['Payment Discounts']
+          - name: 'PyRT'
+            keys: ['HRM-Payroll and TravelExpenses Connector']
