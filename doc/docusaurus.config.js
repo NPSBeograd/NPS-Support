@@ -1,19 +1,40 @@
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const plugin = require('tailwindcss');
+
+const lightCodeTheme = require('prism-react-renderer').themes.github;
+const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 
 // With JSDoc @type annotations, IDEs can provide config autocompletion
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'NPS docs',
+  tagline: 'Documentation for app-source applications ',
   url: 'https://npsbeograd.github.io',
+
   baseUrl: '/NPS-Support/',
+  stylesheets: [
+    {
+      href: '/css/tailwind.css',
+      type: 'text/css',
+    },
+  ],
+  trailingSlash:false,
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'NPSBeograd', // Usually your GitHub org/user name.
   projectName: 'NPS-Support', // Usually your repo name.
-
+  plugins: [
+    function postCssPlugin() {
+      return {
+        name: "custom-postcss-plugin",
+        configurePostCss(postcssOptions) {
+          postcssOptions.plugins.push(require("tailwindcss"));
+          postcssOptions.plugins.push(require("autoprefixer"));
+          return postcssOptions;
+        },
+      };
+    },
+  ],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -41,9 +62,9 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'My Site',
+        title: 'NPS docs',
         logo: {
-          alt: 'My Site Logo',
+          alt: 'nps docs',
           src: 'img/logo.svg',
         },
         items: [
@@ -51,11 +72,11 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             type: 'doc',
             docId: 'intro',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Documentation',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          {to: '/blog', label: 'What\'s new', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/NPSBeograd/NPS-Support',
             label: 'GitHub',
             position: 'right',
           },

@@ -5,7 +5,86 @@
   width: 100%;
 }
 
-.featureSvg {
-  height: 200px;
-  width: 200px;
+.card {
+  width: 300px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Make card responsive for mobile */
+@media (max-width: 768px) {
+  .card {
+    width: 90%; /* Adjust width to 90% of the screen width on smaller screens */
+    padding: 15px; /* Slightly reduce padding on mobile */
+    margin: 10px; /* Reduce margin for mobile */
+  }
+}
+
+/* Further adjustments for very small mobile screens */
+@media (max-width: 480px) {
+  .card {
+    width: 100%; /* Make the card take up the full width on very small screens */
+    padding: 10px; /* Reduce padding even further */
+  }
+}
+
+/* Image styling */
+.card img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.card img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  transition: box-shadow 0.3s ease;
+  
+}
+
+
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+/* Gradient background styling */
+.btngradient {
+  background: linear-gradient(to right, #3b82f6, #22c55e); /* Blue to green gradient */
+  color: white;
+}
+
+/* Accent styling */
+.btnaccent {
+  border: 2px solid #3b82f6; /* Blue border */
+  color: #3b82f6;
+  background: transparent;
+}
+
+/* Hover effect for gradient */
+.btngradient:hover {
+  background: linear-gradient(to right, #2563eb, #16a34a); /* Darker blue to green */
+}
+
+/* Hover effect for accent */
+.btnaccent:hover {
+  background: #3b82f6; /* Blue background */
+  color: white;
+  border-color: #2563eb; /* Darker blue border */
+}
+
+
