@@ -33,30 +33,29 @@ const darkCodeTheme = require('prism-react-renderer').themes.dracula;
           return postcssOptions;
         },
       };
-    },
+    },  'webpack-loaders'
+
   ],
   presets: [
     [
       '@docusaurus/preset-classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
-      ({
+      {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
           editUrl: 'https://github.com/NPSBeograd/NPS-Support/edit/main/doc/docs/',
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            'https://github.com/NPSBeograd/NPS-Support/edit/main/doc/blog/',
+          editUrl: 'https://github.com/NPSBeograd/NPS-Support/edit/main/doc/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
+      
         },
-      }),
+      },
     ],
   ],
+  
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */

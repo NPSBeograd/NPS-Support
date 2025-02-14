@@ -23,8 +23,8 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import Link from '@docusaurus/Link';
-import {ReactComponent as BusinessCentralIcon} from '../../static/img/BusinessCentral_scalable.svg';
-import {ReactComponent as MicrosoftSvg} from '../../static/img/microsoft.svg';
+import  BusinessCentralIcon from '../../static/img/BusinessCentral_scalable.svg';
+import  MicrosoftSvg from '../../static/img/icons8-microsoft.svg';
 
 
 const buttonStyle = {
@@ -48,7 +48,7 @@ const FeatureList = [
         Based on this premise, NPS has created a Serbian localization that makes your Microsoft Dynamics 365 Business Central compliant with all the local laws and regulations of Serbia.
     `,
     link: 'https://appsource.microsoft.com/en-us/product/dynamics-365-business-central/PUBID.npsdoo1580466836471%7CAID.localbase%7CPAPPID.554b40d8-456d-4eac-956d-b825f4debc57?tab=Overview'
-  
+
   },
   {
     title: 'Electronic Invoicing (Serbia)',
@@ -244,39 +244,37 @@ function Feature({ Img, title, description, link, AppSvgIcon, subtitle, techGith
     <Card sx={{ maxWidth: 345 }}>
       <CardHeader
         avatar={
-          <SvgIcon>
-            <BusinessCentralIcon/>
-          </SvgIcon>
+          <SvgIcon component={BusinessCentralIcon} inheritViewBox />
         }
 
         title={title}
         subheader={subtitle}
       />
-        <CardMedia
-          component="img"
-          height="194"
-          image={Img}
-          alt="App Source app"
-          classes={'MuiCardMedia-img'}
-          className='card'
-        />
+      <CardMedia
+        component="img"
+        height="194"
+        image={Img}
+        alt="App Source app"
+        classes={'MuiCardMedia-img'}
+        className='card'
+      />
 
       <CardContent>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <Typography variant="body2">
           {shortdescription}
         </Typography>
       </CardContent>
-      <CardActions disableSpacing>
+      <CardActions>
         <IconButton aria-label="github">
           <Link to={techGithubLink}>
             <GitHubIcon color="primary" />
           </Link>
         </IconButton>
-          <Link to={link}>
-          <SvgIcon> 
-            <MicrosoftSvg/>
-          </SvgIcon>
-          </Link>
+        <IconButton aria-label="appsource">
+        <Link to={link}>
+          <SvgIcon component={MicrosoftSvg} inheritViewBox />
+        </Link>
+        </IconButton >
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
