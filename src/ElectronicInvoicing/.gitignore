@@ -1,0 +1,24 @@
+# AL-specific ignores
+.alpackages/
+.alcache/
+*.app
+*.aps
+*.snapshot
+*.dependencies.json
+.vscode/
+*.vsix
+
+# Symbol cache
+.symbols/
+
+# AL-specific build output
+rad.json
+*.flf
+
+# Temp files
+*.tmp
+*.temp
+
+# Log files
+*.log
+buildOutput.txt

@@ -1,0 +1,42 @@
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "Electronic Invoicing Serbia",
+  "publisher": "NPS Belgrade",
+  "version": "1.0.0.0",
+  "brief": "Electronic Invoicing functionality for Serbia",
+  "description": "Electronic Invoicing functionality for Serbia including Purchase E-Invoices and Incoming Documents integration",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [
+    {
+      "id": "63ca2fa4-4f03-4f2b-a480-172fef340d3f",
+      "publisher": "Microsoft",
+      "name": "System Application",
+      "version": "20.0.0.0"
+    },
+    {
+      "id": "437dbf0e-84ff-417a-965d-ed2bb9650972",
+      "publisher": "Microsoft", 
+      "name": "Base Application",
+      "version": "20.0.0.0"
+    }
+  ],
+  "screenshots": [],
+  "platform": "20.0.0.0",
+  "application": "20.0.0.0",
+  "idRanges": [
+    {
+      "from": 76000,
+      "to": 76999
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": false,
+    "includeSourceInSymbolFile": false
+  },
+  "runtime": "9.0"
+}
