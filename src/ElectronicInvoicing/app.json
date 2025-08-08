@@ -1,7 +1,7 @@
 {
   "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "name": "Electronic Invoicing Serbia",
-  "publisher": "NPS Belgrade",
+  "publisher": "NPS d.o.o.",
   "version": "1.0.0.0",
   "brief": "Electronic Invoicing functionality for Serbia",
   "description": "Electronic Invoicing functionality for Serbia including Purchase E-Invoices and Incoming Documents integration",
