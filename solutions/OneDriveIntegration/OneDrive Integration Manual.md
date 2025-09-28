@@ -122,7 +122,7 @@ Only users in this tenant will be able to run this action! Delegated Admins cann
 
 To run this action Navigate to Related tab in Ein Setup page.
 
-![1759004332741](image/OneDriveIntegrationManual/1759004332741.png)
+![1759060580734](image/OneDriveIntegrationManual/1759060580734.png)
 
 ![1759004359576](image/OneDriveIntegrationManual/1759004359576.png)![1759004378249](image/OneDriveIntegrationManual/1759004378249.png)
 
@@ -131,6 +131,8 @@ To see process running go to Sheduled Tasks or Planirani Zadaci in search bar
 ![1759004489887](image/OneDriveIntegrationManual/1759004489887.png)
 
 Here you can find sheduled tasks, when its completed it will automacally be deleted or when error has happened!
+
+When you want to stop Attachment Transfer run the action Stop Scheduled Transfer Attachments and proccessing in the backgound will be stoped!.
 
 > [!TIP]
 >
