@@ -11,7 +11,8 @@ OUT="${GITHUB_OUTPUT:-/dev/stdout}"
 MAX_ANALIZA="${MAX_ANALIZA:-3}"
 DEFAULT_MAJOR="${BC_DEFAULT_MAJOR:-29}"
 CODE_HISTORY="${BC_CODE_HISTORY_REPO:-https://github.com/StefanMaron/MSDyn365BC.Code.History}"
-MARKER='<!-- nps-claude-analiza -->'
+# Komentari analize nose marker sa režimom (post.sh); u limit se broje samo automatske (prva/dopuna).
+MARKER_PREFIX='<!-- nps-claude-analiza rezim='
 
 ACTION=$(jq -r '.action // ""' "$EVENT")
 ISSUE=$(jq -r '.issue.number // empty' "$EVENT")
@@ -42,7 +43,8 @@ if [[ "$REZIM" == dopuna ]]; then
     RUN=skip
   else
     BROJ=$(gh api --paginate "repos/$GH_REPO/issues/$ISSUE/comments" \
-      --jq ".[] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$MARKER\")) | .id" | wc -l)
+      --jq ".[] | select(.user.login == \"github-actions[bot]\")
+                | select(.body | startswith(\"${MARKER_PREFIX}prva \") or startswith(\"${MARKER_PREFIX}dopuna \")) | .id" | wc -l)
     if (( BROJ >= MAX_ANALIZA )); then
       echo "Dostignut limit od $MAX_ANALIZA automatskih analiza, prosleđujem timu."
       RUN=false
@@ -55,7 +57,8 @@ MAJOR=""
 if [[ "$RUN" == true ]]; then
   VER_LINE=$(jq -r '.issue.body // ""' "$EVENT" | tr -d '\r' \
     | awk 'found && NF {print; exit} /^###[[:space:]]+(Business Central version|Verzija Business Central)/ {found=1}')
-  MAJOR=$(printf '%s' "$VER_LINE" | grep -oE '[0-9]+\.[0-9]+' | head -n1 | cut -d. -f1 || true)
+  # Prvi samostalan dvocifren broj: "29", "29.1", "W1 28.2", "BC29", "25.3.28755.0".
+  MAJOR=$(printf '%s' "$VER_LINE" | grep -oE '(^|[^0-9])[0-9]{2}([^0-9]|$)' | head -n1 | tr -cd '0-9' || true)
   if ! [[ "$MAJOR" =~ ^[0-9]{2}$ ]] || (( 10#$MAJOR < 14 || 10#$MAJOR > 49 )); then
     MAJOR="$DEFAULT_MAJOR"
   fi

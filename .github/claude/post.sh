@@ -9,7 +9,8 @@ REZIM="${REZIM:-}"
 BC_GRANA="${BC_GRANA:-}"
 ANALYZE_RESULT="${ANALYZE_RESULT:-}"
 RESULT="${RESULT:-}"
-MARKER='<!-- nps-claude-analiza -->'
+# Marker sa režimom; prep.sh po njemu broji automatske analize (prva/dopuna) za limit.
+MARKER="<!-- nps-claude-analiza rezim=${REZIM} -->"
 
 ISSUE=$(jq -r '.issue.number // empty' "$EVENT")
 [[ "$ISSUE" =~ ^[0-9]+$ ]] || { echo "Nema broja issue-a u događaju" >&2; exit 1; }
@@ -36,7 +37,8 @@ primeni_labele() {
 # Čišćenje teksta koji je napisao model, pre objave u javnom repou:
 #  - uklanja stvari koje liče na tokene/ključeve,
 #  - gasi HTML (nema <img>, <details>... iz modela),
-#  - uklanja markdown slike (spoljne slike su kanal za curenje podataka),
+#  - uklanja markdown slike (spoljne slike su kanal za curenje podataka); svaki preostali
+#    početak "![" (npr. referentne slike ili URL u sledećem redu) gasi kao HTML entitet,
 #  - @pominjanja pretvara u kod da ne bi slala obaveštenja.
 # shellcheck disable=SC2016  # backtick-ovi su namerni (markdown)
 ocisti() {
@@ -47,6 +49,7 @@ ocisti() {
     -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/[uklonjeno]/g' \
     -e 's/</\&lt;/g' \
     -e 's/!\[[^]]*\]\([^)]*\)/[slika uklonjena]/g' \
+    -e 's/!\[/\&#33;[/g' \
     -e 's/(^|[^A-Za-z0-9_`])@([A-Za-z0-9][A-Za-z0-9-]*)/\1`@\2`/g'
 }
 
@@ -61,7 +64,7 @@ fi
 # --- Analiza nije uspela ili nema ispravan izlaz -----------------------------
 if [[ "$ANALYZE_RESULT" != success ]] || ! jq -e 'type == "object" and (.sazetak | type == "string")' <<<"$RESULT" >/dev/null 2>&1; then
   echo "::warning::Claude analiza nije dala rezultat (status: ${ANALYZE_RESULT:-nepoznat}). Issue ide timu bez komentara."
-  dodaj za-tim; ukloni claude-dubinska
+  dodaj za-tim; ukloni ceka-klijenta; ukloni claude-dubinska
   primeni_labele
   exit 0
 fi
