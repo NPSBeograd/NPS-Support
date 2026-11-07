@@ -6,7 +6,8 @@
 #   3. Član tima doda labelu "claude-deep-analysis" -> "deep" analiza (Opus)
 #
 # Bezbednost (repo je javan, sadržaj issue-a je nepouzdan):
-#   - Agent radi u jobu "analyze" koji ima SAMO dozvole za čitanje i nema alate za pisanje.
+#   - Agent (Agent SDK) ima samo Read/Grep/Glob: nema Bash, mrežu ni GitHub token.
+#     Prijavu i listu prijava mu unapred preuzima korak "Fetch issue" u fajlove (.triage/).
 #   - Komentar i labele postavlja job "post" običnom skriptom, iz strukturisanog izlaza agenta.
 #   - U ovom workflow-u nema drugih tajni osim ANTHROPIC_API_KEY (ključ sa niskim limitom potrošnje).
 
@@ -80,9 +81,9 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      issues: read
+      issues: read   # samo za korak "Fetch issue"; agent nema token
     outputs:
-      result: ${{ steps.claude.outputs.structured_output }}
+      result: ${{ steps.claude.outputs.result }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -98,52 +99,35 @@ jobs:
             https://github.com/StefanMaron/MSDyn365BC.Code.History bc-standard
           rm -rf bc-standard/.git
 
-      - name: Prepare tools and output schema
-        id: schema
-        run: |
-          chmod +x .github/claude/gh.sh
-          echo "json=$(jq -c . .github/claude/triage-schema.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Claude analysis
-        id: claude
-        uses: anthropics/claude-code-action@v1   # posle testiranja zakucajte na commit SHA
+      # Prijava i lista prijava se preuzimaju ovde (bash, bez AI-ja), da agent ne bi imao GitHub token.
+      - name: Fetch issue
         env:
           GH_TOKEN: ${{ github.token }}
-          CLAUDE_CODE_SCRIPT_CAPS: '{"gh.sh":20}'
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ github.token }}
-          allowed_non_write_users: "*"
-          display_report: "false"   # tekst modela nikad u javni Step Summary
-          prompt: "/nps-triage ISSUE=${{ github.event.issue.number }} MODE=${{ needs.prep.outputs.mode }} BC_BRANCH=${{ needs.prep.outputs.bc_branch }}"
-          claude_args: |
-            --model ${{ needs.prep.outputs.model }}
-            --max-turns ${{ needs.prep.outputs.max_turns }}
-            --max-budget-usd ${{ needs.prep.outputs.budget }}
-            --allowedTools "Read,Grep,Glob,Bash(./.github/claude/gh.sh:*)"
-            --disallowedTools "Write,Edit,NotebookEdit,WebFetch,WebSearch"
-            --json-schema '${{ steps.schema.outputs.json }}'
+          GH_REPO: ${{ github.repository }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: bash .github/claude/fetch-issue.sh
 
-      # Kada analiza padne bez ijednog odgovora modela (npr. neispravan API ključ, nema kredita),
-      # action sakriva razlog. Ovaj korak ispisuje samo kratku poruku o grešci, bez teksta modela.
-      - name: Show analysis error
-        if: failure() && steps.claude.outcome == 'failure'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install Agent SDK
+        run: npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/sdk" @anthropic-ai/claude-agent-sdk@0.3.319
+
+      # Agent SDK, a ne claude-code-action: mesečni API kredit Team plana ne pokriva Claude Code.
+      - name: Claude analysis
+        id: claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ISSUE: ${{ github.event.issue.number }}
+          MODE: ${{ needs.prep.outputs.mode }}
+          MODEL: ${{ needs.prep.outputs.model }}
+          MAX_TURNS: ${{ needs.prep.outputs.max_turns }}
+          BUDGET: ${{ needs.prep.outputs.budget }}
+          BC_BRANCH: ${{ needs.prep.outputs.bc_branch }}
         run: |
-          EXEC_FILE="$RUNNER_TEMP/claude-execution-output.json"
-          if [[ ! -f "$EXEC_FILE" ]]; then
-            echo "::error::Execution output not found."
-            exit 0
-          fi
-          jq -r '
-            (if type == "array" then . else [.] end)
-            | map(select(.type == "result")) | last
-            | if . == null then "No result message."
-              elif (.is_error == true) and ((.total_cost_usd // 0) == 0)
-                then "API error: \((.result // .subtype // "unknown")[:300])"
-              else "Model ran (cost \(.total_cost_usd) USD) but returned no structured output (subtype: \(.subtype))."
-              end' "$EXEC_FILE" \
-            | sed -E 's/sk-ant-[A-Za-z0-9_-]+/[removed]/g' \
-            | while IFS= read -r line; do echo "::error::$line"; done
+          cp .github/claude/run-analysis.mjs "$RUNNER_TEMP/sdk/"
+          node "$RUNNER_TEMP/sdk/run-analysis.mjs"
 
   post:
     needs: [prep, analyze]

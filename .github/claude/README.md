@@ -31,7 +31,8 @@ Predlog prioriteta je samo u tekstu komentara.
 - Vidi: prijavu i komentare, druge prijave u ovom repou, dokumentaciju u `doc/docs/` i standardni W1 kod
   za verziju BC-a iz forme (`bc-standard/`, iz StefanMaron/MSDyn365BC.Code.History).
 - Ne vidi: kod naših ekstenzija (privatni repoi) ni tajne repoa (osim API ključa za sopstveni rad).
-- Ne može: da piše komentare, menja labele, menja fajlove ili pristupa internetu. Komentar i labele objavljuje
+- Ne može: da piše komentare, menja labele, menja fajlove, pokreće komande ili pristupa internetu i GitHub-u.
+  Prijavu i listu prijava mu unapred preuzima korak "Fetch issue" u `.triage/`. Komentar i labele objavljuje
   skripta `post.sh` iz strukturisanog izlaza, posle čišćenja (bez HTML-a, slika, tokena i @pominjanja).
 
 ## Podešavanje (jednom)
@@ -51,6 +52,9 @@ Predlog prioriteta je samo u tekstu komentara.
 Claude GitHub App nije potrebna: workflow radi sa ugrađenim `GITHUB_TOKEN`.
 
 ## Troškovi i limiti
+
+- Analiza ide preko Claude Agent SDK-a, pa se troši mesečni API kredit Team plana
+  (claude-code-action se predstavlja kao Claude Code, koji taj kredit ne pokriva).
 
 - Automatska analiza: do 35 koraka i najviše ~1,50 $ po pokretanju (`--max-budget-usd`).
 - Dubinska analiza: do 60 koraka i najviše ~4 $ po pokretanju.
