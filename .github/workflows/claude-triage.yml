@@ -2,8 +2,8 @@
 #
 # Tok:
 #   1. Klijent otvori issue          -> "prva" analiza (Sonnet)
-#   2. Klijent odgovori na pitanja   -> "dopuna" analize (Sonnet), samo dok issue ima labelu "ceka-klijenta"
-#   3. Član tima doda labelu "claude-dubinska" -> "dubinska" analiza (Opus)
+#   2. Klijent odgovori na pitanja   -> "dopuna" analize (Sonnet), samo dok issue ima labelu "waiting-for-customer"
+#   3. Član tima doda labelu "claude-deep-analysis" -> "dubinska" analiza (Opus)
 #
 # Bezbednost (repo je javan, sadržaj issue-a je nepouzdan):
 #   - Agent radi u jobu "analyze" koji ima SAMO dozvole za čitanje i nema alate za pisanje.
@@ -24,9 +24,9 @@ on:
 concurrency:
   group: >-
     claude-triage-${{ github.event.issue.number }}-${{
-      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-dubinska') && 'dubinska' ||
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-deep-analysis') && 'dubinska' ||
       ((github.event_name == 'issues' && github.event.action == 'opened') ||
-       (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'ceka-klijenta') &&
+       (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'waiting-for-customer') &&
         github.event.comment.user.login == github.event.issue.user.login)) && 'auto' ||
       github.run_id }}
   cancel-in-progress: false
@@ -38,9 +38,9 @@ jobs:
     if: >-
       github.event.sender.type != 'Bot' && (
         (github.event_name == 'issues' && github.event.action == 'opened') ||
-        (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-dubinska') ||
+        (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-deep-analysis') ||
         (github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
-         contains(github.event.issue.labels.*.name, 'ceka-klijenta') &&
+         contains(github.event.issue.labels.*.name, 'waiting-for-customer') &&
          github.event.comment.user.login == github.event.issue.user.login)
       )
     runs-on: ubuntu-latest

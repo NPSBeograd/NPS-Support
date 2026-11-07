@@ -38,8 +38,8 @@ RUN=true
 # Dopuna: proveri trenutno stanje (labela je možda već skinuta u međuvremenu)
 # i koliko je automatskih analiza već urađeno na ovom issue-u.
 if [[ "$REZIM" == dopuna ]]; then
-  if ! gh issue view "$ISSUE" --json labels --jq '.labels[].name' | grep -qxF ceka-klijenta; then
-    echo "Issue više nema labelu ceka-klijenta, preskačem."
+  if ! gh issue view "$ISSUE" --json labels --jq '.labels[].name' | grep -qxF waiting-for-customer; then
+    echo "Issue više nema labelu waiting-for-customer, preskačem."
     RUN=skip
   else
     BROJ=$(gh api --paginate "repos/$GH_REPO/issues/$ISSUE/comments" \

@@ -8,19 +8,19 @@ Klijent otvori issue (Bug Report / Suggestion forma ili prazan issue)
         ▼
 Prva analiza (Sonnet) ── komentar: kako smo razumeli + pitanja + tehnička analiza (sklopljeno)
         │
-        ├─ ima pitanja ──► ceka-klijenta ──► klijent odgovori ──► dopuna analize (Sonnet)
+        ├─ ima pitanja ──► waiting-for-customer ──► klijent odgovori ──► dopuna analize (Sonnet)
         │                                                          (najviše 3 automatske analize po issue-u,
         │                                                           posle toga ide timu)
         ▼
-     za-tim ──► tim pregleda (accepted / rejected, prioritet, dodela)
-        │       po potrebi doda labelu  claude-dubinska  ──► dubinska analiza (Opus)
+     ready-for-team ──► tim pregleda (accepted / rejected, prioritet, dodela)
+        │       po potrebi doda labelu  claude-deep-analysis  ──► dubinska analiza (Opus)
         ▼
 Developer radi lokalno (Claude Code nad našim kodom), rešenje, odgovor klijentu, zatvaranje.
 ```
 
 Analiza postavlja samo:
-- `ceka-klijenta` / `za-tim` — status,
-- `moguce-standardno` — ponašanje verovatno postoji i u standardnom BC-u, bez naših ekstenzija,
+- `waiting-for-customer` / `ready-for-team` — status,
+- `possibly-standard` — ponašanje verovatno postoji i u standardnom BC-u, bez naših ekstenzija,
 - `bug` / `suggestion` / `question` — samo ako issue još nema nijednu od njih.
 
 Prioritet (`priority …`), ekstenziju, `accepted`/`rejected` i dodelu i dalje postavlja tim.

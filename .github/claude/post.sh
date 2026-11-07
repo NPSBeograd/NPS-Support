@@ -56,7 +56,7 @@ ocisti() {
 # --- Analiza nije pokrenuta jer je dostignut limit dopuna -------------------
 if [[ "$RUN" == false ]]; then
   gh issue comment "$ISSUE" --body "Hvala na dodatnim informacijama. Zahtev je prosleđen timu NPS, koji će se javiti u ovom issue-u."
-  dodaj za-tim; ukloni ceka-klijenta
+  dodaj ready-for-team; ukloni waiting-for-customer
   primeni_labele
   exit 0
 fi
@@ -64,7 +64,7 @@ fi
 # --- Analiza nije uspela ili nema ispravan izlaz -----------------------------
 if [[ "$ANALYZE_RESULT" != success ]] || ! jq -e 'type == "object" and (.sazetak | type == "string")' <<<"$RESULT" >/dev/null 2>&1; then
   echo "::warning::Claude analiza nije dala rezultat (status: ${ANALYZE_RESULT:-nepoznat}). Issue ide timu bez komentara."
-  dodaj za-tim; ukloni ceka-klijenta; ukloni claude-dubinska
+  dodaj ready-for-team; ukloni waiting-for-customer; ukloni claude-deep-analysis
   primeni_labele
   exit 0
 fi
@@ -149,15 +149,15 @@ if ! grep -qxE 'bug|suggestion|question' <<<"$ISSUE_LABELS"; then
   esac
 fi
 
-if [[ "$STD" == da || "$STD" == mozda ]]; then dodaj moguce-standardno; else ukloni moguce-standardno; fi
+if [[ "$STD" == da || "$STD" == mozda ]]; then dodaj possibly-standard; else ukloni possibly-standard; fi
 
 if [[ -n "$PITANJA" ]]; then
-  dodaj ceka-klijenta; ukloni za-tim
+  dodaj waiting-for-customer; ukloni ready-for-team
 else
-  dodaj za-tim; ukloni ceka-klijenta
+  dodaj ready-for-team; ukloni waiting-for-customer
 fi
 
-[[ "$REZIM" == dubinska ]] && ukloni claude-dubinska
+[[ "$REZIM" == dubinska ]] && ukloni claude-deep-analysis
 
 primeni_labele
 echo "Objavljeno na issue #$ISSUE."
