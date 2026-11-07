@@ -124,6 +124,27 @@ jobs:
             --disallowedTools "Write,Edit,NotebookEdit,WebFetch,WebSearch"
             --json-schema '${{ steps.schema.outputs.json }}'
 
+      # Kada analiza padne bez ijednog odgovora modela (npr. neispravan API ključ, nema kredita),
+      # action sakriva razlog. Ovaj korak ispisuje samo kratku poruku o grešci, bez teksta modela.
+      - name: Show analysis error
+        if: failure() && steps.claude.outcome == 'failure'
+        run: |
+          EXEC_FILE="$RUNNER_TEMP/claude-execution-output.json"
+          if [[ ! -f "$EXEC_FILE" ]]; then
+            echo "::error::Execution output not found."
+            exit 0
+          fi
+          jq -r '
+            (if type == "array" then . else [.] end)
+            | map(select(.type == "result")) | last
+            | if . == null then "No result message."
+              elif (.is_error == true) and ((.total_cost_usd // 0) == 0)
+                then "API error: \((.result // .subtype // "unknown")[:300])"
+              else "Model ran (cost \(.total_cost_usd) USD) but returned no structured output (subtype: \(.subtype))."
+              end' "$EXEC_FILE" \
+            | sed -E 's/sk-ant-[A-Za-z0-9_-]+/[removed]/g' \
+            | while IFS= read -r line; do echo "::error::$line"; done
+
   post:
     needs: [prep, analyze]
     if: always() && needs.prep.result == 'success'
