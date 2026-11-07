@@ -31,9 +31,11 @@ gh issue view "$ISSUE" --json number,title,body,author,labels,state,createdAt,co
       end)
     ' > "$OUT_DIR/issue.md"
 
-# Lista postojećih prijava (broj, stanje, naslov, labele) za traženje sličnih.
-gh issue list --state all --limit 300 --json number,title,state,labels \
-  | jq -r '.[] | "#\(.number) [\(.state)] \(.title) (\([.labels[].name] | join(", ")))"' \
-  | grep -v "^#${ISSUE} " > "$OUT_DIR/issues-list.md" || true
+# Lista svih ostalih prijava (broj, stanje, naslov, labele) za traženje sličnih.
+# gh issue list vraća samo issue-e (ne pull request-ove); greške gh/jq prekidaju skriptu (pipefail).
+gh issue list --state all --limit 5000 --json number,title,state,labels \
+  | jq -r --argjson current "$ISSUE" \
+      '.[] | select(.number != $current) | "#\(.number) [\(.state)] \(.title) (\([.labels[].name] | join(", ")))"' \
+  > "$OUT_DIR/issues-list.md"
 
 echo "Fetched issue #$ISSUE ($(wc -c < "$OUT_DIR/issue.md") bytes) and $(wc -l < "$OUT_DIR/issues-list.md") other issues."

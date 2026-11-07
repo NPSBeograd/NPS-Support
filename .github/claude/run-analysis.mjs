@@ -6,7 +6,8 @@
 // Agent ima samo alate za čitanje (Read, Grep, Glob), nema Bash, mrežu ni GitHub token.
 // U log se ne ispisuje tekst modela, samo status, trošak i kratka poruka greške.
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import { readFileSync, appendFileSync } from "node:fs";
+import { readFileSync, appendFileSync, realpathSync } from "node:fs";
+import { resolve, dirname, basename, isAbsolute, sep } from "node:path";
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -38,8 +39,53 @@ const agentEnv = {
 };
 if (process.env.ANTHROPIC_BASE_URL) agentEnv.ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL;
 
-// Čitanje van radnog direktorijuma je zabranjeno (posebno /proc, gde su promenljive procesa).
-const blockedPaths = ["//proc/**", "//sys/**", "//etc/**", "//root/**", "//tmp/**", "~/**"];
+// Agent sme da čita samo unutar radnog direktorijuma (workspace).
+// Svaka putanja iz Read/Grep/Glob se kanonizuje (realpath) i proverava; sve van workspace-a se odbija.
+const workspaceRoot = realpathSync(process.cwd());
+
+function canonicalize(path) {
+  const absolute = resolve(workspaceRoot, path);
+  try {
+    return realpathSync(absolute);
+  } catch {
+    // Fajl ne postoji: kanonizuj roditeljski folder i dodaj ime.
+    try {
+      return resolve(realpathSync(dirname(absolute)), basename(absolute));
+    } catch {
+      return absolute;
+    }
+  }
+}
+
+function isInsideWorkspace(path) {
+  const canonical = canonicalize(path);
+  return canonical === workspaceRoot || canonical.startsWith(workspaceRoot + sep);
+}
+
+function deny(reason) {
+  return {
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: reason,
+    },
+  };
+}
+
+async function restrictToWorkspace(input) {
+  const toolInput = input.tool_input ?? {};
+  const paths = [toolInput.file_path, toolInput.path].filter((value) => typeof value === "string" && value !== "");
+  for (const path of paths) {
+    if (!isInsideWorkspace(path)) return deny("Only files inside the workspace can be read.");
+  }
+  // Glob obrazac (Glob.pattern, Grep.glob) ne sme da izađe iz workspace-a. Grep.pattern je regex, ne putanja.
+  const globPattern = input.tool_name === "Glob" ? toolInput.pattern : toolInput.glob;
+  if (typeof globPattern === "string" &&
+      (isAbsolute(globPattern) || globPattern.startsWith("~") || globPattern.split(/[\\/]/).includes(".."))) {
+    return deny("Patterns must stay inside the workspace.");
+  }
+  return {};
+}
 
 const options = {
   cwd: process.cwd(),
@@ -52,10 +98,11 @@ const options = {
   skills: ["nps-triage"],
   tools: ["Read", "Grep", "Glob"],
   allowedTools: ["Read", "Grep", "Glob"],
-  disallowedTools: [
-    "Bash", "Write", "Edit", "NotebookEdit", "WebFetch", "WebSearch", "Agent", "Task",
-    ...blockedPaths.flatMap((path) => [`Read(${path})`, `Grep(${path})`, `Glob(${path})`]),
-  ],
+  disallowedTools: ["Bash", "Write", "Edit", "NotebookEdit", "WebFetch", "WebSearch", "Agent", "Task"],
+  hooks: {
+    // onFailure "block": ako provera baci grešku, poziv alata se odbija, ne propušta.
+    PreToolUse: [{ matcher: "Read|Grep|Glob", hooks: [restrictToWorkspace], onFailure: "block" }],
+  },
   permissionMode: "dontAsk",
   outputFormat: { type: "json_schema", schema },
 };
