@@ -5,32 +5,32 @@ set -euo pipefail
 
 EVENT="${GITHUB_EVENT_PATH:?}"
 RUN="${RUN:-}"
-REZIM="${REZIM:-}"
-BC_GRANA="${BC_GRANA:-}"
+MODE="${MODE:-}"
+BC_BRANCH="${BC_BRANCH:-}"
 ANALYZE_RESULT="${ANALYZE_RESULT:-}"
 RESULT="${RESULT:-}"
-# Marker sa režimom; prep.sh po njemu broji automatske analize (prva/dopuna) za limit.
-MARKER="<!-- nps-claude-analiza rezim=${REZIM} -->"
+# Marker sa režimom; prep.sh po njemu broji automatske analize (initial/followup) za limit.
+MARKER="<!-- nps-claude-triage mode=${MODE} -->"
 
 ISSUE=$(jq -r '.issue.number // empty' "$EVENT")
-[[ "$ISSUE" =~ ^[0-9]+$ ]] || { echo "Nema broja issue-a u događaju" >&2; exit 1; }
+[[ "$ISSUE" =~ ^[0-9]+$ ]] || { echo "No issue number in event payload" >&2; exit 1; }
 
 if [[ "$RUN" == skip ]]; then
-  echo "Ništa za objavu."
+  echo "Nothing to post."
   exit 0
 fi
 
 REPO_LABELS=$(gh label list --limit 500 --json name --jq '.[].name')
 ISSUE_LABELS=$(gh issue view "$ISSUE" --json labels --jq '.labels[].name')
 
-ADD=()
-REMOVE=()
-dodaj()  { if grep -qxF -- "$1" <<<"$REPO_LABELS";  then ADD+=("$1");    fi; }
-ukloni() { if grep -qxF -- "$1" <<<"$ISSUE_LABELS"; then REMOVE+=("$1"); fi; }
-primeni_labele() {
-  local args=() l
-  for l in "${ADD[@]+"${ADD[@]}"}";       do args+=(--add-label "$l");    done
-  for l in "${REMOVE[@]+"${REMOVE[@]}"}"; do args+=(--remove-label "$l"); done
+LABELS_TO_ADD=()
+LABELS_TO_REMOVE=()
+add_label()    { if grep -qxF -- "$1" <<<"$REPO_LABELS";  then LABELS_TO_ADD+=("$1");    fi; }
+remove_label() { if grep -qxF -- "$1" <<<"$ISSUE_LABELS"; then LABELS_TO_REMOVE+=("$1"); fi; }
+apply_labels() {
+  local args=() label
+  for label in "${LABELS_TO_ADD[@]+"${LABELS_TO_ADD[@]}"}";       do args+=(--add-label "$label");    done
+  for label in "${LABELS_TO_REMOVE[@]+"${LABELS_TO_REMOVE[@]}"}"; do args+=(--remove-label "$label"); done
   if (( ${#args[@]} )); then gh issue edit "$ISSUE" "${args[@]}"; fi
 }
 
@@ -41,123 +41,121 @@ primeni_labele() {
 #    početak "![" (npr. referentne slike ili URL u sledećem redu) gasi kao HTML entitet,
 #  - @pominjanja pretvara u kod da ne bi slala obaveštenja.
 # shellcheck disable=SC2016  # backtick-ovi su namerni (markdown)
-ocisti() {
+sanitize() {
   sed -E \
-    -e 's/sk-ant-[A-Za-z0-9_-]+/[uklonjeno]/g' \
-    -e 's/(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}/[uklonjeno]/g' \
-    -e 's/github_pat_[A-Za-z0-9_]{20,}/[uklonjeno]/g' \
-    -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/[uklonjeno]/g' \
+    -e 's/sk-ant-[A-Za-z0-9_-]+/[removed]/g' \
+    -e 's/(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}/[removed]/g' \
+    -e 's/github_pat_[A-Za-z0-9_]{20,}/[removed]/g' \
+    -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/[removed]/g' \
     -e 's/</\&lt;/g' \
-    -e 's/!\[[^]]*\]\([^)]*\)/[slika uklonjena]/g' \
+    -e 's/!\[[^]]*\]\([^)]*\)/[image removed]/g' \
     -e 's/!\[/\&#33;[/g' \
     -e 's/(^|[^A-Za-z0-9_`])@([A-Za-z0-9][A-Za-z0-9-]*)/\1`@\2`/g'
 }
 
-# --- Analiza nije pokrenuta jer je dostignut limit dopuna -------------------
+# --- Analiza nije pokrenuta jer je dostignut limit automatskih analiza ------
 if [[ "$RUN" == false ]]; then
   gh issue comment "$ISSUE" --body "Hvala na dodatnim informacijama. Zahtev je prosleđen timu NPS, koji će se javiti u ovom issue-u."
-  dodaj ready-for-team; ukloni waiting-for-customer
-  primeni_labele
+  add_label ready-for-team; remove_label waiting-for-customer
+  apply_labels
   exit 0
 fi
 
 # --- Analiza nije uspela ili nema ispravan izlaz -----------------------------
-if [[ "$ANALYZE_RESULT" != success ]] || ! jq -e 'type == "object" and (.sazetak | type == "string")' <<<"$RESULT" >/dev/null 2>&1; then
-  echo "::warning::Claude analiza nije dala rezultat (status: ${ANALYZE_RESULT:-nepoznat}). Issue ide timu bez komentara."
-  dodaj ready-for-team; ukloni waiting-for-customer; ukloni claude-deep-analysis
-  primeni_labele
+if [[ "$ANALYZE_RESULT" != success ]] || ! jq -e 'type == "object" and (.summary | type == "string")' <<<"$RESULT" >/dev/null 2>&1; then
+  echo "::warning::Claude analysis produced no result (status: ${ANALYZE_RESULT:-unknown}). Issue goes to the team without a comment."
+  add_label ready-for-team; remove_label waiting-for-customer; remove_label claude-deep-analysis
+  apply_labels
   exit 0
 fi
 
 # --- Polja iz strukturisanog izlaza (dužine ograničene u jq-u) --------------
-polje() { jq -r "$1" <<<"$RESULT"; }
-JEZIK=$(polje '.jezik // "sr"')
-TIP=$(polje '.tip // ""')
-STD=$(polje '.standardno_ponasanje // "nepoznato"')
-PRIO=$(polje '.prioritet // ""')
-EKST=$(polje '(.ekstenzija // "")[:100]' | ocisti)
-SAZETAK=$(polje '(.sazetak // "")[:2000]' | ocisti)
-ANALIZA=$(polje '(.analiza // "")[:12000]' | ocisti)
-PITANJA=$(polje '(.pitanja // [])[:6] | to_entries[] | "\(.key + 1). \(.value[:500] | gsub("\n"; " "))"' | ocisti)
+field() { jq -r "$1" <<<"$RESULT"; }
+LANGUAGE=$(field '.language // "sr"')
+TYPE=$(field '.type // ""')
+STANDARD=$(field '.standard_behavior // "unknown"')
+PRIORITY=$(field '.priority // ""')
+EXTENSION=$(field '(.extension // "")[:100]' | sanitize)
+SUMMARY=$(field '(.summary // "")[:2000]' | sanitize)
+ANALYSIS=$(field '(.analysis // "")[:12000]' | sanitize)
+QUESTIONS=$(field '(.questions // [])[:6] | to_entries[] | "\(.key + 1). \(.value[:500] | gsub("\n"; " "))"' | sanitize)
 # shellcheck disable=SC2016
-REFERENCE=$(polje '(.reference // [])[:15][]
-  | "- `\(.putanja[:200] | gsub("`"; ""))`"
-    + (if (.objekat // "") != "" then " — \(.objekat[:150])" else "" end)
-    + (if (.napomena // "") != "" then ": \(.napomena[:300] | gsub("\n"; " "))" else "" end)' | ocisti)
+REFERENCES=$(field '(.references // [])[:15][]
+  | "- `\(.path[:200] | gsub("`"; ""))`"
+    + (if (.object // "") != "" then " — \(.object[:150])" else "" end)
+    + (if (.note // "") != "" then ": \(.note[:300] | gsub("\n"; " "))" else "" end)' | sanitize)
 
-if [[ "$JEZIK" == en ]]; then
-  H_UVOD="**Automated analysis (AI).** The NPS team will review this request and follow up."
-  H_SAZETAK="### Our understanding of the request"
-  H_PITANJA="### Additional information needed"
-  H_ODGOVOR="Please reply in a comment below. Do not post passwords or confidential data — this repository is public."
-  H_TEH="Technical analysis for the NPS team"
+if [[ "$LANGUAGE" == en ]]; then
+  TXT_INTRO="**Automated analysis (AI).** The NPS team will review this request and follow up."
+  TXT_SUMMARY="### Our understanding of the request"
+  TXT_QUESTIONS="### Additional information needed"
+  TXT_REPLY="Please reply in a comment below. Do not post passwords or confidential data — this repository is public."
+  TXT_TECH="Technical analysis for the NPS team"
 else
-  H_UVOD="**Automatska analiza (AI).** Tim NPS će pregledati zahtev i javiti se."
-  H_SAZETAK="### Kako smo razumeli zahtev"
-  H_PITANJA="### Potrebne dodatne informacije"
-  H_ODGOVOR="Molimo odgovorite u komentaru ispod. Ne unosite lozinke ni poverljive podatke — repozitorijum je javan."
-  H_TEH="Tehnička analiza za NPS tim"
+  TXT_INTRO="**Automatska analiza (AI).** Tim NPS će pregledati zahtev i javiti se."
+  TXT_SUMMARY="### Kako smo razumeli zahtev"
+  TXT_QUESTIONS="### Potrebne dodatne informacije"
+  TXT_REPLY="Molimo odgovorite u komentaru ispod. Ne unosite lozinke ni poverljive podatke — repozitorijum je javan."
+  TXT_TECH="Tehnička analiza za NPS tim"
 fi
 
-case "$STD" in
-  da)       STD_TXT="verovatno da" ;;
-  mozda)    STD_TXT="moguće" ;;
-  ne)       STD_TXT="verovatno ne" ;;
-  *)        STD_TXT="nije utvrđeno" ;;
+case "$STANDARD" in
+  yes)   STANDARD_TXT="verovatno da" ;;
+  maybe) STANDARD_TXT="moguće" ;;
+  no)    STANDARD_TXT="verovatno ne" ;;
+  *)     STANDARD_TXT="nije utvrđeno" ;;
 esac
 
-TELO=$(mktemp)
+BODY_FILE=$(mktemp)
 {
   echo "$MARKER"
-  echo "$H_UVOD"
+  echo "$TXT_INTRO"
   echo
-  echo "$H_SAZETAK"
-  echo "$SAZETAK"
-  if [[ -n "$PITANJA" ]]; then
+  echo "$TXT_SUMMARY"
+  echo "$SUMMARY"
+  if [[ -n "$QUESTIONS" ]]; then
     echo
-    echo "$H_PITANJA"
-    echo "$PITANJA"
+    echo "$TXT_QUESTIONS"
+    echo "$QUESTIONS"
     echo
-    echo "_${H_ODGOVOR}_"
+    echo "_${TXT_REPLY}_"
   fi
   echo
-  echo "<details><summary>${H_TEH}</summary>"
+  echo "<details><summary>${TXT_TECH}</summary>"
   echo
-  echo "**Režim:** ${REZIM} · **Tip:** ${TIP:-?} · **Ekstenzija:** ${EKST:-?} · **Standardno BC ponašanje:** ${STD_TXT} · **Predlog prioriteta:** ${PRIO:-?}"
+  echo "**Režim:** ${MODE} · **Tip:** ${TYPE:-?} · **Ekstenzija:** ${EXTENSION:-?} · **Standardno BC ponašanje:** ${STANDARD_TXT} · **Predlog prioriteta:** ${PRIORITY:-?}"
   echo
-  echo "$ANALIZA"
-  if [[ -n "$REFERENCE" ]]; then
+  echo "$ANALYSIS"
+  if [[ -n "$REFERENCES" ]]; then
     echo
-    echo "**Reference u standardnom kodu${BC_GRANA:+ (${BC_GRANA})}:**"
-    echo "$REFERENCE"
+    echo "**Reference u standardnom kodu${BC_BRANCH:+ (${BC_BRANCH})}:**"
+    echo "$REFERENCES"
   fi
   echo
   echo "</details>"
-} > "$TELO"
+} > "$BODY_FILE"
 
-gh issue comment "$ISSUE" --body-file "$TELO"
+gh issue comment "$ISSUE" --body-file "$BODY_FILE"
 
 # --- Labele -----------------------------------------------------------------
 # Tip (bug / suggestion / question) dodaje se samo ako ga issue još nema — forma ili tim imaju prednost.
 # Prioritet i ekstenziju analiza ne postavlja: prioritet je samo predlog u komentaru,
 # a ekstenziju postavlja postojeći issueLabeler iz forme.
 if ! grep -qxE 'bug|suggestion|question' <<<"$ISSUE_LABELS"; then
-  case "$TIP" in
-    greska)           dodaj bug ;;
-    zahtev-za-izmenu) dodaj suggestion ;;
-    pitanje)          dodaj question ;;
+  case "$TYPE" in
+    bug|suggestion|question) add_label "$TYPE" ;;
   esac
 fi
 
-if [[ "$STD" == da || "$STD" == mozda ]]; then dodaj possibly-standard; else ukloni possibly-standard; fi
+if [[ "$STANDARD" == yes || "$STANDARD" == maybe ]]; then add_label possibly-standard; else remove_label possibly-standard; fi
 
-if [[ -n "$PITANJA" ]]; then
-  dodaj waiting-for-customer; ukloni ready-for-team
+if [[ -n "$QUESTIONS" ]]; then
+  add_label waiting-for-customer; remove_label ready-for-team
 else
-  dodaj ready-for-team; ukloni waiting-for-customer
+  add_label ready-for-team; remove_label waiting-for-customer
 fi
 
-[[ "$REZIM" == dubinska ]] && ukloni claude-deep-analysis
+[[ "$MODE" == deep ]] && remove_label claude-deep-analysis
 
-primeni_labele
-echo "Objavljeno na issue #$ISSUE."
+apply_labels
+echo "Posted on issue #$ISSUE."

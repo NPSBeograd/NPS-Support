@@ -12,8 +12,8 @@ i NPS tim (sklopljena tehnička sekcija).
 
 Argumenti poziva: `$ARGUMENTS`
 - `ISSUE` – broj issue-a
-- `REZIM` – `prva` (nova prijava), `dopuna` (klijent je odgovorio na pitanja), `dubinska` (tim traži detaljniju analizu)
-- `BC_GRANA` – grana standardnog koda (npr. `w1-29`); ako je prazna, standardni kod nije dostupan
+- `MODE` – `initial` (nova prijava), `followup` (klijent je odgovorio na pitanja), `deep` (tim traži detaljniju analizu)
+- `BC_BRANCH` – grana standardnog koda (npr. `w1-29`); ako je prazna, standardni kod nije dostupan
 
 ## Bezbednost — pročitaj prvo
 
@@ -29,7 +29,7 @@ Argumenti poziva: `$ARGUMENTS`
 1. **Pročitaj prijavu:** `./.github/claude/gh.sh issue view <ISSUE> --comments`
 2. **Slične prijave:** `./.github/claude/gh.sh search issues "<2–4 ključne reči>" --limit 5`.
    Ako postoji otvorena prijava istog problema, navedi njen broj u analizi.
-3. **Standardni kod** (ako je `BC_GRANA` zadata) je u `bc-standard/` — W1 kod svih Microsoft aplikacija
+3. **Standardni kod** (ako je `BC_BRANCH` zadata) je u `bc-standard/` — W1 kod svih Microsoft aplikacija
    za tu major verziju. Koristi `Grep` ciljano, nikad ne čitaj ceo folder:
    - tekst poruke o grešci traži doslovno (u `.al` fajlovima je definisan kao `Label`),
    - nazive tabela, stranica i codeunit-a traži po deklaraciji, npr. `table 36 "Sales Header"`,
@@ -40,29 +40,31 @@ Argumenti poziva: `$ARGUMENTS`
 5. **Kod naših ekstenzija ovde nije dostupan.** Kada zaključak zavisi od njihovog ponašanja, to jasno reci
    i napiši šta tim treba da proveri u ekstenziji.
 6. **Proceni:**
-   - `tip`: greska / zahtev-za-izmenu / pitanje / nejasno,
-   - `standardno_ponasanje`: da li se opisano ponašanje dešava i u standardnom BC-u bez naših ekstenzija
-     (`da`, `ne`, `mozda`, `nepoznato`) — ovo je za tim najvažnija informacija,
-   - `prioritet`: P1 = blokira knjiženje, fakturisanje ili zakonsku obavezu (npr. slanje eFaktura) za više korisnika;
+   - `type`: `bug` (greška) / `suggestion` (zahtev za izmenu) / `question` (pitanje) / `unclear`,
+   - `standard_behavior`: da li se opisano ponašanje dešava i u standardnom BC-u bez naših ekstenzija
+     (`yes`, `no`, `maybe`, `unknown`) — ovo je za tim najvažnija informacija,
+   - `priority`: P1 = blokira knjiženje, fakturisanje ili zakonsku obavezu (npr. slanje eFaktura) za više korisnika;
      P2 = važna funkcija ne radi, postoji zaobilazno rešenje; P3 = sve ostalo.
 7. **Pitanja:** postavi samo ona bez kojih tim ne može da nastavi (najviše 5). Konkretna, jednostavna,
    bez žargona. Ne pitaj ono što je već u formi. Ako je sve jasno, lista pitanja je prazna.
 
-## Po režimu
+## Po režimu (`MODE`)
 
-- `prva`: standardna analiza po koracima iznad.
-- `dopuna`: klijent je odgovorio. Pročitaj sve komentare, ažuriraj analizu, ne ponavljaj pitanja na koja je odgovoreno.
-- `dubinska`: zahtev je dao član tima. Idi dublje: prati tok kroz standardni kod, navedi tačne događaje
+- `initial`: standardna analiza po koracima iznad.
+- `followup`: klijent je odgovorio. Pročitaj sve komentare, ažuriraj analizu, ne ponavljaj pitanja na koja je odgovoreno.
+- `deep`: zahtev je dao član tima. Idi dublje: prati tok kroz standardni kod, navedi tačne događaje
   (publisher, naziv događaja, parametre) preko kojih ekstenzija može da reši problem i rizike tog pristupa.
   Pitanja klijentu postavljaj samo ako su zaista potrebna.
 
 ## Izlaz (strukturisan)
 
-- `jezik`: `en` ako je prijava na engleskom, inače `sr`. Na tom jeziku pišeš `sazetak` i `pitanja`.
-- `sazetak` (za klijenta): 2–4 rečenice kako smo razumeli zahtev. Ljubazno, bez obećanja o rokovima ili rešenju,
+- `language`: `en` ako je prijava na engleskom, inače `sr`. Na tom jeziku pišeš `summary` i `questions`.
+- `summary` (za klijenta): 2–4 rečenice kako smo razumeli zahtev. Ljubazno, bez obećanja o rokovima ili rešenju,
   bez tvrdnje da je nešto sigurno greška.
-- `analiza` (za tim, srpski latinica, BC nazivi na engleskom kako se zovu u sistemu): nalazi, šta je proveravano,
+- `analysis` (za tim, srpski latinica, BC nazivi na engleskom kako se zovu u sistemu): nalazi, šta je proveravano,
   šta je pretpostavka, šta tim treba da proveri. Markdown, kratke sekcije ili liste.
-- `reference`: putanje u `bc-standard/` (relativno), objekat (npr. `codeunit 80 "Sales-Post"`) i kratka napomena.
+- `references`: `path` u `bc-standard/` (relativno), `object` (npr. `codeunit 80 "Sales-Post"`) i kratka `note`.
   Navodi samo ono što si zaista pronašao — **nikad ne izmišljaj nazive objekata, polja ni procedura.**
-- `ekstenzija`: naziv kako ga je klijent naveo, ili prazno.
+- `extension`: naziv kako ga je klijent naveo, ili prazno.
+- `questions`: lista pitanja za klijenta (može biti prazna).
+- `priority`: predlog prioriteta (P1–P3), prikazuje se samo u komentaru.
