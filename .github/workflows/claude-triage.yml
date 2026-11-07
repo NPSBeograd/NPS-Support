@@ -1,16 +1,16 @@
 # Automatska analiza prijava (issue-a) pomoću Claude-a.
 #
-# Tok:
-#   1. Klijent otvori issue          -> "prva" analiza (Sonnet)
-#   2. Klijent odgovori na pitanja   -> "dopuna" analize (Sonnet), samo dok issue ima labelu "waiting-for-customer"
-#   3. Član tima doda labelu "claude-deep-analysis" -> "dubinska" analiza (Opus)
+# Tok (mode):
+#   1. Klijent otvori issue          -> "initial" analiza (Sonnet)
+#   2. Klijent odgovori na pitanja   -> "followup" analiza (Sonnet), samo dok issue ima labelu "waiting-for-customer"
+#   3. Član tima doda labelu "claude-deep-analysis" -> "deep" analiza (Opus)
 #
 # Bezbednost (repo je javan, sadržaj issue-a je nepouzdan):
 #   - Agent radi u jobu "analyze" koji ima SAMO dozvole za čitanje i nema alate za pisanje.
 #   - Komentar i labele postavlja job "post" običnom skriptom, iz strukturisanog izlaza agenta.
 #   - U ovom workflow-u nema drugih tajni osim ANTHROPIC_API_KEY (ključ sa niskim limitom potrošnje).
 
-name: Claude analiza prijava
+name: Claude issue triage
 
 on:
   issues:
@@ -24,7 +24,7 @@ on:
 concurrency:
   group: >-
     claude-triage-${{ github.event.issue.number }}-${{
-      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-deep-analysis') && 'dubinska' ||
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude-deep-analysis') && 'deep' ||
       ((github.event_name == 'issues' && github.event.action == 'opened') ||
        (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'waiting-for-customer') &&
         github.event.comment.user.login == github.event.issue.user.login)) && 'auto' ||
@@ -50,11 +50,11 @@ jobs:
       issues: read
     outputs:
       run: ${{ steps.prep.outputs.run }}
-      rezim: ${{ steps.prep.outputs.rezim }}
+      mode: ${{ steps.prep.outputs.mode }}
       model: ${{ steps.prep.outputs.model }}
       max_turns: ${{ steps.prep.outputs.max_turns }}
       budget: ${{ steps.prep.outputs.budget }}
-      bc_grana: ${{ steps.prep.outputs.bc_grana }}
+      bc_branch: ${{ steps.prep.outputs.bc_branch }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,15 +62,15 @@ jobs:
           persist-credentials: false
           sparse-checkout: .github/claude
 
-      - name: Priprema (režim, model, verzija BC-a)
+      - name: Prepare (mode, model, BC version)
         id: prep
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          MAX_ANALIZA: ${{ vars.CLAUDE_MAX_ANALIZA || '3' }}
+          MAX_AUTO_RUNS: ${{ vars.CLAUDE_MAX_AUTO_RUNS || '3' }}
           BC_DEFAULT_MAJOR: ${{ vars.BC_DEFAULT_MAJOR || '29' }}
           CLAUDE_MODEL_AUTO: ${{ vars.CLAUDE_MODEL_AUTO || 'claude-sonnet-5-5' }}
-          CLAUDE_MODEL_DUBINSKA: ${{ vars.CLAUDE_MODEL_DUBINSKA || 'claude-opus-5-5' }}
+          CLAUDE_MODEL_DEEP: ${{ vars.CLAUDE_MODEL_DEEP || 'claude-opus-5-5' }}
         run: bash .github/claude/prep.sh
 
   analyze:
@@ -89,22 +89,22 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Standardni BC kod (MSDyn365BC.Code.History)
-        if: needs.prep.outputs.bc_grana != ''
+      - name: Standard BC code (MSDyn365BC.Code.History)
+        if: needs.prep.outputs.bc_branch != ''
         env:
-          GRANA: ${{ needs.prep.outputs.bc_grana }}
+          BC_BRANCH: ${{ needs.prep.outputs.bc_branch }}
         run: |
-          git clone --depth 1 --single-branch -b "$GRANA" \
+          git clone --depth 1 --single-branch -b "$BC_BRANCH" \
             https://github.com/StefanMaron/MSDyn365BC.Code.History bc-standard
           rm -rf bc-standard/.git
 
-      - name: Priprema alata i šeme izlaza
+      - name: Prepare tools and output schema
         id: schema
         run: |
           chmod +x .github/claude/gh.sh
           echo "json=$(jq -c . .github/claude/triage-schema.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Claude analiza
+      - name: Claude analysis
         id: claude
         uses: anthropics/claude-code-action@v1   # posle testiranja zakucajte na commit SHA
         env:
@@ -115,7 +115,7 @@ jobs:
           github_token: ${{ github.token }}
           allowed_non_write_users: "*"
           display_report: "false"   # tekst modela nikad u javni Step Summary
-          prompt: "/nps-triage ISSUE=${{ github.event.issue.number }} REZIM=${{ needs.prep.outputs.rezim }} BC_GRANA=${{ needs.prep.outputs.bc_grana }}"
+          prompt: "/nps-triage ISSUE=${{ github.event.issue.number }} MODE=${{ needs.prep.outputs.mode }} BC_BRANCH=${{ needs.prep.outputs.bc_branch }}"
           claude_args: |
             --model ${{ needs.prep.outputs.model }}
             --max-turns ${{ needs.prep.outputs.max_turns }}
@@ -139,13 +139,13 @@ jobs:
           persist-credentials: false
           sparse-checkout: .github/claude
 
-      - name: Komentar i labele
+      - name: Post comment and labels
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RUN: ${{ needs.prep.outputs.run }}
-          REZIM: ${{ needs.prep.outputs.rezim }}
-          BC_GRANA: ${{ needs.prep.outputs.bc_grana }}
+          MODE: ${{ needs.prep.outputs.mode }}
+          BC_BRANCH: ${{ needs.prep.outputs.bc_branch }}
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           RESULT: ${{ needs.analyze.outputs.result }}
         run: bash .github/claude/post.sh

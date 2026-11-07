@@ -6,14 +6,14 @@
 Klijent otvori issue (Bug Report / Suggestion forma ili prazan issue)
         │   postojeći workflow-i i dalje rade: labela ekstenzije, dodavanje u projekat
         ▼
-Prva analiza (Sonnet) ── komentar: kako smo razumeli + pitanja + tehnička analiza (sklopljeno)
+Prva analiza — initial (Sonnet) ── komentar: kako smo razumeli + pitanja + tehnička analiza (sklopljeno)
         │
-        ├─ ima pitanja ──► waiting-for-customer ──► klijent odgovori ──► dopuna analize (Sonnet)
+        ├─ ima pitanja ──► waiting-for-customer ──► klijent odgovori ──► dopuna analize — followup (Sonnet)
         │                                                          (najviše 3 automatske analize po issue-u,
         │                                                           posle toga ide timu)
         ▼
      ready-for-team ──► tim pregleda (accepted / rejected, prioritet, dodela)
-        │       po potrebi doda labelu  claude-deep-analysis  ──► dubinska analiza (Opus)
+        │       po potrebi doda labelu  claude-deep-analysis  ──► dubinska analiza — deep (Opus)
         ▼
 Developer radi lokalno (Claude Code nad našim kodom), rešenje, odgovor klijentu, zatvaranje.
 ```
@@ -43,8 +43,8 @@ Predlog prioriteta je samo u tekstu komentara.
 3. **Opciono, repo varijable** (*Settings → Secrets and variables → Actions → Variables*):
    - `BC_DEFAULT_MAJOR` — verzija BC-a kada je klijent ne navede (podrazumevano `29`)
    - `CLAUDE_MODEL_AUTO` — model za automatske analize (podrazumevano `claude-sonnet-5-5`)
-   - `CLAUDE_MODEL_DUBINSKA` — model za dubinsku analizu (podrazumevano `claude-opus-5-5`)
-   - `CLAUDE_MAX_ANALIZA` — koliko automatskih analiza po issue-u (podrazumevano `3`)
+   - `CLAUDE_MODEL_DEEP` — model za dubinsku analizu (podrazumevano `claude-opus-5-5`)
+   - `CLAUDE_MAX_AUTO_RUNS` — koliko automatskih analiza po issue-u (podrazumevano `3`)
 4. **Test:** otvorite issue sa naloga koji **nije** član organizacije i proverite komentar i labele.
    Posle testa zakucajte `anthropics/claude-code-action@v1` na konkretan commit SHA.
 
