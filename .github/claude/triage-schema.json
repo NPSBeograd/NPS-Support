@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["jezik", "tip", "ekstenzija", "sazetak", "analiza", "standardno_ponasanje", "reference", "pitanja", "prioritet"],
+  "properties": {
+    "jezik": { "type": "string", "enum": ["sr", "en"] },
+    "tip": { "type": "string", "enum": ["greska", "zahtev-za-izmenu", "pitanje", "nejasno"] },
+    "ekstenzija": { "type": "string", "maxLength": 100 },
+    "sazetak": { "type": "string", "maxLength": 2000 },
+    "analiza": { "type": "string", "maxLength": 12000 },
+    "standardno_ponasanje": { "type": "string", "enum": ["da", "ne", "mozda", "nepoznato"] },
+    "reference": {
+      "type": "array",
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["putanja", "objekat", "napomena"],
+        "properties": {
+          "putanja": { "type": "string", "maxLength": 200 },
+          "objekat": { "type": "string", "maxLength": 150 },
+          "napomena": { "type": "string", "maxLength": 300 }
+        }
+      }
+    },
+    "pitanja": { "type": "array", "maxItems": 6, "items": { "type": "string", "maxLength": 500 } },
+    "prioritet": { "type": "string", "enum": ["P1", "P2", "P3"] }
+  }
+}

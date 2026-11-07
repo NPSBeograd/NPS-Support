@@ -10,6 +10,11 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
+
+        **This repository is public.** Do not include passwords, keys, personal data or confidential business data.
+        Cover sensitive data on screenshots. / **Repozitorijum je javan** — ne unosite lozinke ni poverljive podatke.
+
+        After you submit, an automated AI analysis reviews the report and may ask follow-up questions in a comment.
   - type: input
     id: contact
     attributes:
@@ -43,6 +48,41 @@ body:
         - Payment Discounts
         - Sales Price Inventory Value
       default: 0
+  - type: input
+    id: bc-version
+    attributes:
+      label: Business Central version
+      description: "In Business Central: ? (Help) → Help & Support → Troubleshooting. Used to compare with standard BC code."
+      placeholder: "ex. 29.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - SaaS (cloud)
+        - OnPrem
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: "Extension Management page, Version column."
+      placeholder: "ex. 29.0.12.0"
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. The error message appears ...
+    validations:
+      required: false
   - type: textarea
     id: logs
     attributes:
