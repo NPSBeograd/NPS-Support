@@ -1,9 +1,10 @@
 # Automatska analiza prijava (issue-a) pomoću Claude-a.
 #
 # Tok (mode):
-#   1. Klijent otvori issue          -> "initial" analiza (Sonnet)
+#   1. Klijent otvori issue          -> "initial" analiza (Sonnet), javni komentar
 #   2. Klijent odgovori na pitanja   -> "followup" analiza (Sonnet), samo dok issue ima labelu "waiting-for-customer"
-#   3. Član tima doda labelu "claude-deep-analysis" -> "deep" analiza (Opus)
+#   3. Član tima doda labelu "claude-deep-analysis" -> "deep" analiza (Opus) sa kodom ekstenzije;
+#      rezultat ide kao interni issue u privatni repo ekstenzije, javno samo kratka napomena.
 #
 # Bezbednost (repo je javan, sadržaj issue-a je nepouzdan):
 #   - Agent (Agent SDK) ima samo Read/Grep/Glob: nema Bash, mrežu ni GitHub token.
@@ -56,6 +57,7 @@ jobs:
       max_turns: ${{ steps.prep.outputs.max_turns }}
       budget: ${{ steps.prep.outputs.budget }}
       bc_branch: ${{ steps.prep.outputs.bc_branch }}
+      ext_repos: ${{ steps.prep.outputs.ext_repos }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -72,6 +74,8 @@ jobs:
           BC_DEFAULT_MAJOR: ${{ vars.BC_DEFAULT_MAJOR || '29' }}
           CLAUDE_MODEL_AUTO: ${{ vars.CLAUDE_MODEL_AUTO || 'claude-sonnet-5-5' }}
           CLAUDE_MODEL_DEEP: ${{ vars.CLAUDE_MODEL_DEEP || 'claude-opus-5-5' }}
+          # Samo da li token postoji (true/false), ne i sam token.
+          HAS_EXTENSIONS_TOKEN: ${{ secrets.EXTENSIONS_TOKEN != '' }}
         run: bash .github/claude/prep.sh
 
   analyze:
@@ -99,6 +103,25 @@ jobs:
             https://github.com/StefanMaron/MSDyn365BC.Code.History bc-standard
           rm -rf bc-standard/.git
 
+      # Kod ekstenzija (privatni repoi), samo za dubinsku analizu. Token se koristi samo u ovom koraku
+      # (http.extraheader, ne upisuje se u .git/config), a .git se briše; agent ga nikad ne vidi.
+      - name: Extension code (private repos)
+        if: needs.prep.outputs.ext_repos != ''
+        env:
+          EXTENSIONS_TOKEN: ${{ secrets.EXTENSIONS_TOKEN }}
+          EXT_REPOS: ${{ needs.prep.outputs.ext_repos }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          AUTH=$(printf 'x-access-token:%s' "$EXTENSIONS_TOKEN" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          mkdir -p extension
+          for repo in $EXT_REPOS; do
+            git -c http.extraheader="AUTHORIZATION: basic $AUTH" \
+              clone --quiet --depth 1 "https://github.com/$OWNER/$repo" "extension/$repo"
+            rm -rf "extension/$repo/.git"
+            echo "Fetched extension code: $repo"
+          done
+
       # Prijava i lista prijava se preuzimaju ovde (bash, bez AI-ja), da agent ne bi imao GitHub token.
       - name: Fetch issue
         env:
@@ -125,6 +148,7 @@ jobs:
           MAX_TURNS: ${{ needs.prep.outputs.max_turns }}
           BUDGET: ${{ needs.prep.outputs.budget }}
           BC_BRANCH: ${{ needs.prep.outputs.bc_branch }}
+          EXT_REPOS: ${{ needs.prep.outputs.ext_repos }}
         run: |
           cp .github/claude/run-analysis.mjs "$RUNNER_TEMP/sdk/"
           node "$RUNNER_TEMP/sdk/run-analysis.mjs"
@@ -151,6 +175,10 @@ jobs:
           RUN: ${{ needs.prep.outputs.run }}
           MODE: ${{ needs.prep.outputs.mode }}
           BC_BRANCH: ${{ needs.prep.outputs.bc_branch }}
+          EXT_REPOS: ${{ needs.prep.outputs.ext_repos }}
+          # Za interni issue u privatnom repou ekstenzije (samo dubinska analiza sa kodom ekstenzije).
+          EXTENSIONS_TOKEN: ${{ needs.prep.outputs.ext_repos != '' && secrets.EXTENSIONS_TOKEN || '' }}
+          OWNER: ${{ github.repository_owner }}
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           RESULT: ${{ needs.analyze.outputs.result }}
         run: bash .github/claude/post.sh

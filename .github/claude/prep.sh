@@ -77,6 +77,22 @@ if [[ "$RUN" == true ]]; then
   fi
 fi
 
+# Kod ekstenzija (privatni repoi) dobija samo dubinska analiza, i to samo ako postoji EXTENSIONS_TOKEN.
+# Repoi se biraju po labelama ekstenzija na issue-u (LOC, EIN...) preko extension-repos.json,
+# pa nijedan naziv repoa ne dolazi direktno iz teksta prijave. Najviše 3 repoa; prvi je "primarni"
+# (u njemu se otvara interni issue sa analizom).
+EXT_REPOS=""
+if [[ "$RUN" == true && "$MODE" == deep && "${HAS_EXTENSIONS_TOKEN:-false}" == true ]]; then
+  MAP_FILE="$(dirname "$0")/extension-repos.json"
+  EXT_REPOS=$(gh issue view "$ISSUE" --json labels --jq '.labels[].name' \
+    | jq -R -r --slurpfile map "$MAP_FILE" '$map[0][.] // empty' \
+    | awk '!seen[$0]++' | head -n 3 | tr '\n' ' ' | sed 's/ $//')
+  for repo in $EXT_REPOS; do
+    [[ "$repo" =~ ^[A-Za-z0-9_.-]+$ ]] || { echo "Invalid repo name in map: $repo" >&2; exit 1; }
+  done
+  [[ -z "$EXT_REPOS" ]] && echo "No extension label on the issue, deep analysis runs without extension code."
+fi
+
 {
   echo "run=$RUN"
   echo "mode=$MODE"
@@ -84,6 +100,7 @@ fi
   echo "max_turns=$MAX_TURNS"
   echo "budget=$BUDGET"
   echo "bc_branch=$BC_BRANCH"
+  echo "ext_repos=$EXT_REPOS"
 } >> "$OUT"
 
-echo "Issue #$ISSUE: mode=$MODE run=$RUN model=$MODEL branch=${BC_BRANCH:-none}"
+echo "Issue #$ISSUE: mode=$MODE run=$RUN model=$MODEL branch=${BC_BRANCH:-none} extensions=${EXT_REPOS:-none}"

@@ -7,6 +7,9 @@ EVENT="${GITHUB_EVENT_PATH:?}"
 RUN="${RUN:-}"
 MODE="${MODE:-}"
 BC_BRANCH="${BC_BRANCH:-}"
+EXT_REPOS="${EXT_REPOS:-}"
+EXTENSIONS_TOKEN="${EXTENSIONS_TOKEN:-}"
+OWNER="${OWNER:-}"
 ANALYZE_RESULT="${ANALYZE_RESULT:-}"
 RESULT="${RESULT:-}"
 # Marker sa režimom; prep.sh po njemu broji automatske analize (initial/followup) za limit.
@@ -128,12 +131,59 @@ BODY_FILE=$(mktemp)
   echo "$ANALYSIS"
   if [[ -n "$REFERENCES" ]]; then
     echo
-    echo "**Reference u standardnom kodu${BC_BRANCH:+ (${BC_BRANCH})}:**"
+    echo "**Reference u kodu${BC_BRANCH:+ (standardni kod: ${BC_BRANCH})}:**"
     echo "$REFERENCES"
   fi
   echo
   echo "</details>"
 } > "$BODY_FILE"
+
+# --- Dubinska analiza sa kodom ekstenzije: rezultat ide u privatni repo -----
+# Analiza je videla privatni kod, pa njen tekst ne sme u javni repo. Otvara se interni issue
+# u primarnom repou ekstenzije (sa linkom ka javnoj prijavi; GitHub tada u javnoj prijavi prikazuje
+# referencu samo onima koji imaju pristup privatnom repou), a javno ide samo fiksna napomena.
+if [[ "$MODE" == deep && -n "$EXT_REPOS" ]]; then
+  if [[ -z "$EXTENSIONS_TOKEN" || -z "$OWNER" ]]; then
+    echo "::error::Extension code was used but EXTENSIONS_TOKEN or OWNER is missing; nothing is posted publicly."
+    exit 1
+  fi
+  PRIMARY_REPO="${EXT_REPOS%% *}"
+  PUBLIC_URL=$(jq -r '.issue.html_url' "$EVENT")
+  TITLE=$(jq -r '.issue.title // ""' "$EVENT" | tr -d '\r\n' | cut -c1-150)
+  PRIVATE_BODY=$(mktemp)
+  {
+    echo "**Interna dubinska analiza (AI)** za javnu prijavu ${PUBLIC_URL}"
+    echo
+    echo "**Kod ekstenzija:** \`${EXT_REPOS// /\`, \`}\`${BC_BRANCH:+ · **Standardni kod:** \`${BC_BRANCH}\`}"
+    echo "**Tip:** ${TYPE:-?} · **Ekstenzija:** ${EXTENSION:-?} · **Standardno BC ponašanje:** ${STANDARD_TXT} · **Predlog prioriteta:** ${PRIORITY:-?}"
+    echo
+    echo "### Sažetak"
+    echo "$SUMMARY"
+    echo
+    echo "### Analiza"
+    echo "$ANALYSIS"
+    if [[ -n "$REFERENCES" ]]; then
+      echo
+      echo "### Reference u kodu"
+      echo "$REFERENCES"
+    fi
+    if [[ -n "$QUESTIONS" ]]; then
+      echo
+      echo "### Pitanja za klijenta (tim prosleđuje u javnoj prijavi po potrebi)"
+      echo "$QUESTIONS"
+    fi
+  } > "$PRIVATE_BODY"
+  PRIVATE_URL=$(GH_TOKEN="$EXTENSIONS_TOKEN" gh issue create --repo "$OWNER/$PRIMARY_REPO" \
+    --title "NPS-Support #${ISSUE}: ${TITLE}" --body-file "$PRIVATE_BODY")
+  echo "Internal analysis: $PRIVATE_URL"
+
+  gh issue comment "$ISSUE" --body "${MARKER}
+Tim NPS je pokrenuo detaljnu internu analizu ove prijave i javiće se u ovom issue-u."
+  remove_label claude-deep-analysis
+  apply_labels
+  echo "Posted internal analysis to $OWNER/$PRIMARY_REPO and a note on issue #$ISSUE."
+  exit 0
+fi
 
 gh issue comment "$ISSUE" --body-file "$BODY_FILE"
 

@@ -1,0 +1,12 @@
+{
+  "LOC": "Business-Central-Localization",
+  "EIN": "Electronic-Invoicing",
+  "ELC": "CON_EIN_NPSLoc",
+  "PyR": "HRM-and-Payroll",
+  "PyRT": "HRM-Payroll-and-Travel-Expenses-Connector",
+  "TRO": "Travel-Order",
+  "MFM": "Manufacturing-Management",
+  "PyD": "Payment-Discounts",
+  "SPI": "Sales-Price-Inventory-Value",
+  "TRL": "Serbian-Translation-W1"
+}
