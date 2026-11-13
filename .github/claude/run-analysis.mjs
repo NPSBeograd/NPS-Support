@@ -27,7 +27,9 @@ const outputFile = requireEnv("GITHUB_OUTPUT");
 const bcBranch = process.env.BC_BRANCH ?? "";
 
 const schema = JSON.parse(readFileSync(".github/claude/triage-schema.json", "utf8"));
-const prompt = `/nps-triage ISSUE=${issue} MODE=${mode} BC_BRANCH=${bcBranch}`;
+// Folderi sa kodom ekstenzija (samo dubinska analiza), npr. "extension/Business-Central-Localization".
+const extensionDirs = (process.env.EXT_REPOS ?? "").split(/\s+/).filter(Boolean).map((repo) => `extension/${repo}`).join(",");
+const prompt = `/nps-triage ISSUE=${issue} MODE=${mode} BC_BRANCH=${bcBranch} EXTENSION_DIRS=${extensionDirs}`;
 
 // Agent dobija samo ono što mu treba; ostale promenljive runner-a (tokeni, ACTIONS_*) ne prosleđujemo.
 const agentEnv = {
